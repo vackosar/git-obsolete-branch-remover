@@ -17,6 +17,9 @@ public class GitIT {
     private static final String FILENAME = "test.txt";
     private static final File FILE = new File(DIR.getPath() + "/" + FILENAME);
     private static final String REPODIRNAME = ".git";
+    private static final String STEP_BACK = "HEAD^";
+    private static final String ALL_FILES = ".";
+    private static final String MESSAGE = "test";
 
     @Before
     public void createTmpDir() {
@@ -33,7 +36,7 @@ public class GitIT {
     public void commitModifyAndReset() throws GitAPIException, IOException {
         final Git git = initialize();
         FILE.delete();
-        git.reset().setRef("HEAD^").setMode(ResetCommand.ResetType.HARD).call();
+        git.reset().setRef(STEP_BACK).setMode(ResetCommand.ResetType.HARD).call();
         Assert.assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, DIR.list());
     }
 
@@ -42,8 +45,8 @@ public class GitIT {
         final Git git = Git.init().setDirectory(DIR).call();
         Assert.assertArrayEquals(new String[]{REPODIRNAME}, DIR.list());
         FILE.createNewFile();
-        git.add().addFilepattern(".").call();
-        git.commit().setMessage("test").call();
+        git.add().addFilepattern(ALL_FILES).call();
+        git.commit().setMessage(MESSAGE).call();
         Assert.assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, DIR.list());
         return git;
     }
