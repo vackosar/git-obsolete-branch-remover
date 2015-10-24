@@ -5,6 +5,8 @@ import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +15,11 @@ import org.junit.Assert;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -87,6 +93,21 @@ public class GitIT {
         git.branchCreate().setName(branches.branch2.name()).call();
         final List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
         Assert.assertArrayEquals(branches.list(), list.stream().map((ref) -> ref.getName()).toArray());
+    }
+
+    @Test
+    public void readCommitDate() throws GitAPIException, IOException, InterruptedException {
+        final Git git = initialize();
+        final List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+        final Ref ref = list.get(0);
+        RevWalk walk = new RevWalk(git.getRepository());
+        RevCommit commit = walk.parseCommit(ref.getObjectId());
+        Thread.sleep(1000);
+        Assert.assertTrue(getSecondsFromEpoch() - commit.getCommitTime() > 0);
+    }
+
+    private int getSecondsFromEpoch() {
+        return (int) (new Date().getTime() / 1000);
     }
 
     void delete(File f) throws IOException {
