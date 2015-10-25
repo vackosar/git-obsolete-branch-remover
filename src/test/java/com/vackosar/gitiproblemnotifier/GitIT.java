@@ -58,19 +58,19 @@ public class GitIT {
 
     @Before
     public void createTmpDir() throws IOException {
-        try {
-            cleanUp();
-        } catch (IOException e) {
-            // do nothing
-        }
+        cleanUp();
         LOCAL.mkdir();
         REMOTE.mkdir();
     }
 
     @After
-    public void cleanUp() throws IOException {
-        delete(LOCAL);
-        delete(REMOTE);
+    public void cleanUp() {
+        try {
+            delete(LOCAL);
+            delete(REMOTE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -82,13 +82,21 @@ public class GitIT {
     }
 
     @Test
-    public void push() throws GitAPIException, IOException, InterruptedException, URISyntaxException {
+    public void pushAndPull() throws GitAPIException, IOException, InterruptedException, URISyntaxException {
         final Git git = commitFile();
         git.log();
-        startRemoteDaemon(git);
-        RefSpec spec = new RefSpec("refs/heads/master:refs/heads/master");
-        final Iterable<PushResult> results = git.push().setRefSpecs(spec).call();
-        Thread.sleep(60000);
+        startRemoteDaemon();
+        configureRemote(git);
+        final Iterable<PushResult> results = git.push().call();
+        git.clean().call();
+        git.close();
+        delete(LOCAL);
+        final Git git2 = initialize();
+        configureRemote(git2);
+        git2.pull().call();
+        assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
+        git.gc().call();
+        git.close();
     }
 
     private Git commitFile() throws GitAPIException, IOException {
@@ -127,12 +135,15 @@ public class GitIT {
         assertTrue(getSecondsFromEpoch() - commit.getCommitTime() > 0);
     }
 
-    private void startRemoteDaemon(Git git) throws GitAPIException, IOException, URISyntaxException {
+    private void startRemoteDaemon() throws GitAPIException, IOException, URISyntaxException {
         Daemon server = new Daemon(new InetSocketAddress(9418));
         boolean uploadsEnabled = true;
         server.getService("git-receive-pack").setEnabled(uploadsEnabled);
         server.setRepositoryResolver(new RepositoryResolverImplementation());
         server.start();
+    }
+
+    private void configureRemote(Git git) throws URISyntaxException, IOException {
         StoredConfig config = git.getRepository().getConfig();
         config.setString("remote", "origin" ,"fetch", "+refs/heads/*:refs/remotes/origin/*");
         config.setString("remote", "origin" ,"push", "+refs/heads/*:refs/remotes/origin/*");
