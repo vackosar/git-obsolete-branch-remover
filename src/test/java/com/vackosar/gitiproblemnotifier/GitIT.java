@@ -7,34 +7,36 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.transport.Daemon;
-import org.eclipse.jgit.transport.DaemonClient;
-import org.eclipse.jgit.transport.ServiceMayNotContinueException;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Stream;
 
 public class GitIT {
 
-    private static final File DIR = new File("./tmp/");
+    private static final File LOCAL = new File("tmp/local");
+    private static final File REMOTE = new File("tmp/remote");
     private static final String FILENAME = "test.txt";
-    private static final File FILE = new File(DIR.getPath() + "/" + FILENAME);
+    private static final File FILE = new File(LOCAL.getPath() + "/" + FILENAME);
     private static final String REPODIRNAME = ".git";
     private static final String STEP_BACK = "HEAD";
     private static final String ALL_FILES = ".";
@@ -61,12 +63,14 @@ public class GitIT {
         } catch (IOException e) {
             // do nothing
         }
-        DIR.mkdir();
+        LOCAL.mkdir();
+        REMOTE.mkdir();
     }
 
     @After
     public void cleanUp() throws IOException {
-        delete(DIR);
+        delete(LOCAL);
+        delete(REMOTE);
     }
 
     @Test
@@ -74,16 +78,16 @@ public class GitIT {
         final Git git = commitFile();
         FILE.delete();
         git.reset().setRef(STEP_BACK).setMode(ResetCommand.ResetType.HARD).call();
-        Assert.assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, DIR.list());
+        assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
     }
 
     @Test
-    public void push() throws GitAPIException, IOException, InterruptedException {
+    public void push() throws GitAPIException, IOException, InterruptedException, URISyntaxException {
         final Git git = commitFile();
+        git.log();
         startRemoteDaemon(git);
-        git.push().call();
-        FILE.delete();
-        git.pull().call();
+        RefSpec spec = new RefSpec("refs/heads/master:refs/heads/master");
+        final Iterable<PushResult> results = git.push().setRefSpecs(spec).call();
         Thread.sleep(60000);
     }
 
@@ -92,14 +96,14 @@ public class GitIT {
         FILE.createNewFile();
         git.add().addFilepattern(ALL_FILES).call();
         git.commit().setMessage(MESSAGE).call();
-        Assert.assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, DIR.list());
+        assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
         return git;
     }
 
     private Git initialize() throws GitAPIException {
-        final Git git = Git.init().setDirectory(DIR).call();
+        final Git git = Git.init().setDirectory(LOCAL).call();
         git.commit().setMessage(MESSAGE).call();
-        Assert.assertArrayEquals(new String[]{REPODIRNAME}, DIR.list());
+        assertArrayEquals(new String[]{REPODIRNAME}, LOCAL.list());
         return git;
     }
 
@@ -109,7 +113,7 @@ public class GitIT {
         git.branchCreate().setName(branches.branch1.name()).call();
         git.branchCreate().setName(branches.branch2.name()).call();
         final List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
-        Assert.assertArrayEquals(branches.list(), list.stream().map((ref) -> ref.getName()).toArray());
+        assertArrayEquals(branches.list(), list.stream().map((ref) -> ref.getName()).toArray());
     }
 
     @Test
@@ -120,21 +124,27 @@ public class GitIT {
         RevWalk walk = new RevWalk(git.getRepository());
         RevCommit commit = walk.parseCommit(ref.getObjectId());
         Thread.sleep(1000);
-        Assert.assertTrue(getSecondsFromEpoch() - commit.getCommitTime() > 0);
+        assertTrue(getSecondsFromEpoch() - commit.getCommitTime() > 0);
     }
 
-    private void startRemoteDaemon(Git git) throws GitAPIException, IOException {
+    private void startRemoteDaemon(Git git) throws GitAPIException, IOException, URISyntaxException {
         Daemon server = new Daemon(new InetSocketAddress(9418));
         boolean uploadsEnabled = true;
         server.getService("git-receive-pack").setEnabled(uploadsEnabled);
         server.setRepositoryResolver(new RepositoryResolverImplementation());
         server.start();
         StoredConfig config = git.getRepository().getConfig();
-        config.setString("remote", "origin", "url", "git://localhost/repo.git");
         config.setString("remote", "origin" ,"fetch", "+refs/heads/*:refs/remotes/origin/*");
+        config.setString("remote", "origin" ,"push", "+refs/heads/*:refs/remotes/origin/*");
         config.setString("branch", "master", "remote", "origin");
         config.setString("branch", "master", "merge", "refs/heads/master");
-        System.out.println(config);
+        config.setString("push", null, "default", "current");
+        RemoteConfig remoteConfig = new RemoteConfig(config, "origin");
+        URIish uri = new URIish("git://localhost/repo.git");
+        remoteConfig.addURI(uri);
+        remoteConfig.addFetchRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
+        remoteConfig.addPushRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
+        remoteConfig.update(config);
         config.save();
     }
 
@@ -145,17 +155,21 @@ public class GitIT {
                 throws RepositoryNotFoundException,
                 ServiceNotAuthorizedException, ServiceNotEnabledException,
                 ServiceMayNotContinueException {
-            InMemoryRepository repo = repositories.get(name);
+            Repository repo = repositories.get(name);
             if (repo == null) {
-                repo = new InMemoryRepository(
-                        new DfsRepositoryDescription(name));
+                try {
+                    repo = new InMemoryRepository(new DfsRepositoryDescription(name));
+                    repo.create(true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 repositories.put(name, repo);
             }
             return repo;
         }
     }
 
-    private static Map<String, InMemoryRepository> repositories = new HashMap<String, InMemoryRepository>();
+    private static Map<String, Repository> repositories = new HashMap<>();
 
     private int getSecondsFromEpoch() {
         return (int) (new Date().getTime() / 1000);
