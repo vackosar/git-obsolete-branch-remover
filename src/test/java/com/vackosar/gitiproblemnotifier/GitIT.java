@@ -88,10 +88,12 @@ public class GitIT {
         startRemoteDaemon();
         configureRemote(git);
         final Iterable<PushResult> results = git.push().call();
+        git.close();
         delete(LOCAL);
         final Git git2 = initialize();
         configureRemote(git2);
         git2.pull().call();
+        git2.close();
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
     }
 
