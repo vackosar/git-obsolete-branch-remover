@@ -88,15 +88,11 @@ public class GitIT {
         startRemoteDaemon();
         configureRemote(git);
         final Iterable<PushResult> results = git.push().call();
-        git.clean().call();
-        git.close();
         delete(LOCAL);
         final Git git2 = initialize();
         configureRemote(git2);
         git2.pull().call();
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
-        git.gc().call();
-        git.close();
     }
 
     private Git commitFile() throws GitAPIException, IOException {
