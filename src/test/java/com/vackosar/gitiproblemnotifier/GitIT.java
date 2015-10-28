@@ -24,10 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -43,6 +40,7 @@ public class GitIT {
     private static final String STEP_BACK = "HEAD";
     private static final String ALL_FILES = ".";
     private static final String MESSAGE = "test";
+    private static final String REF_HEAD = "HEAD";
     private Git git;
 
     private enum branches {
@@ -127,6 +125,9 @@ public class GitIT {
         git.branchCreate().setName(branches.branch2.name()).call();
         final List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
         assertArrayEquals(branches.list(), list.stream().map(Ref::getName).toArray());
+        final Object[] actuals = git.getRepository().getAllRefs().entrySet().stream().map(Map.Entry::getKey).filter(s -> ! s.equals(REF_HEAD)).toArray();
+        System.out.println(Arrays.deepToString(actuals));
+        assertArrayEquals(branches.list(), actuals);
     }
 
     @Test
