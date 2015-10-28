@@ -20,13 +20,19 @@ import java.util.Map;
 
 public class RepoMock {
 
+    public static final String REPO_URL = "git://localhost/repo.git";
+
     private static Map<String, Repository> repositories = new HashMap<>();
 
-    public static void start() throws GitAPIException, IOException, URISyntaxException {
-        Daemon server = new Daemon(new InetSocketAddress(9418));
-        server.getService("git-receive-pack").setEnabled(true);
-        server.setRepositoryResolver(new RepositoryResolverImplementation());
-        server.start();
+    public static void start() {
+        try {
+            Daemon server = new Daemon(new InetSocketAddress(9418));
+            server.getService("git-receive-pack").setEnabled(true);
+            server.setRepositoryResolver(new RepositoryResolverImplementation());
+            server.start();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static final class RepositoryResolverImplementation implements

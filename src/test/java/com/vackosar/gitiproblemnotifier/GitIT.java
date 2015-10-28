@@ -145,7 +145,7 @@ public class GitIT {
         config.setString("branch", "master", "merge", "refs/heads/master");
         config.setString("push", null, "default", "current");
         RemoteConfig remoteConfig = new RemoteConfig(config, "origin");
-        URIish uri = new URIish("git://localhost/repo.git");
+        URIish uri = new URIish(RepoMock.REPO_URL);
         remoteConfig.addURI(uri);
         remoteConfig.addFetchRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
         remoteConfig.addPushRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
