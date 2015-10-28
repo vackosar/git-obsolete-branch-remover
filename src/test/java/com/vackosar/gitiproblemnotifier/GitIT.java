@@ -41,6 +41,8 @@ public class GitIT {
     private static final String STEP_BACK = "HEAD";
     private static final String ALL_FILES = ".";
     private static final String MESSAGE = "test";
+    private Git git;
+
     private enum branches {
         branch1,
         branch2,
@@ -57,14 +59,19 @@ public class GitIT {
     }
 
     @Before
-    public void createTmpDir() throws IOException {
+    public void setUp() throws IOException, GitAPIException {
         cleanUp();
         LOCAL.mkdir();
         REMOTE.mkdir();
+        git = initialize();
     }
 
     @After
     public void cleanUp() {
+        if (git != null) {
+            git.getRepository().close();
+            git.close();
+        }
         try {
             delete(LOCAL);
             delete(REMOTE);
@@ -75,7 +82,7 @@ public class GitIT {
 
     @Test
     public void commitModifyAndReset() throws GitAPIException, IOException {
-        final Git git = commitFile();
+        commitFile();
         FILE.delete();
         git.reset().setRef(STEP_BACK).setMode(ResetCommand.ResetType.HARD).call();
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
@@ -83,7 +90,7 @@ public class GitIT {
 
     @Test
     public void pushAndPull() throws GitAPIException, IOException, InterruptedException, URISyntaxException {
-        final Git git = commitFile();
+        commitFile();
         git.log();
         startRemoteDaemon();
         configureRemote(git);
@@ -93,17 +100,16 @@ public class GitIT {
         final Git git2 = initialize();
         configureRemote(git2);
         git2.pull().call();
-        git2.close();
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
+        git2.getRepository().close();
+        git2.close();
     }
 
-    private Git commitFile() throws GitAPIException, IOException {
-        final Git git = initialize();
+    private void commitFile() throws GitAPIException, IOException {
         FILE.createNewFile();
         git.add().addFilepattern(ALL_FILES).call();
         git.commit().setMessage(MESSAGE).call();
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
-        return git;
     }
 
     private Git initialize() throws GitAPIException {
@@ -115,7 +121,6 @@ public class GitIT {
 
     @Test
     public void listBranches() throws GitAPIException {
-        final Git git = initialize();
         git.branchCreate().setName(branches.branch1.name()).call();
         git.branchCreate().setName(branches.branch2.name()).call();
         final List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
@@ -124,7 +129,6 @@ public class GitIT {
 
     @Test
     public void readCommitDate() throws GitAPIException, IOException, InterruptedException {
-        final Git git = initialize();
         final List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
         final Ref ref = list.get(0);
         RevWalk walk = new RevWalk(git.getRepository());
