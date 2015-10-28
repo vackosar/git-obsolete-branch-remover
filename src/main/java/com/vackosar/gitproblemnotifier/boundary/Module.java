@@ -1,12 +1,10 @@
 package com.vackosar.gitproblemnotifier.boundary;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 
 import java.io.File;
 
