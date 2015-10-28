@@ -62,24 +62,24 @@ public class GitIT {
 
     @Before
     public void setUp() throws IOException, GitAPIException {
-        cleanUp();
+        try {
+            cleanUp();
+        } catch (IOException e) {
+            // do nothing
+        }
         LOCAL.mkdir();
         REMOTE.mkdir();
         git = initialize();
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws IOException {
         if (git != null) {
             git.getRepository().close();
             git.close();
         }
-        try {
-            delete(LOCAL);
-            delete(REMOTE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        delete(LOCAL);
+        delete(REMOTE);
     }
 
     @Test
@@ -99,12 +99,12 @@ public class GitIT {
         git.push().call();
         git.close();
         delete(LOCAL);
-        final Git git2 = initialize();
-        configureRemote(git2);
-        git2.pull().call();
+        git = initialize();
+        configureRemote(git);
+        git.pull().call();
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, LOCAL.list());
-        git2.getRepository().close();
-        git2.close();
+        git.getRepository().close();
+        git.close();
     }
 
     private void commitFile() throws GitAPIException, IOException {
