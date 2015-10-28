@@ -4,27 +4,24 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.errors.RepositoryNotFoundException;
-import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
-import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.transport.*;
-import org.eclipse.jgit.transport.resolver.RepositoryResolver;
-import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
-import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
+import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -92,7 +89,7 @@ public class GitIT {
     public void pushAndPull() throws GitAPIException, IOException, InterruptedException, URISyntaxException {
         commitFile();
         git.log();
-        startRemoteDaemon();
+        RepoMock.start();
         configureRemote(git);
         git.push().call();
         git.close();
@@ -140,13 +137,6 @@ public class GitIT {
         assertTrue(getSecondsFromEpoch() - commit.getCommitTime() > 0);
     }
 
-    private void startRemoteDaemon() throws GitAPIException, IOException, URISyntaxException {
-        Daemon server = new Daemon(new InetSocketAddress(9418));
-        server.getService("git-receive-pack").setEnabled(true);
-        server.setRepositoryResolver(new RepositoryResolverImplementation());
-        server.start();
-    }
-
     private void configureRemote(Git git) throws URISyntaxException, IOException {
         StoredConfig config = git.getRepository().getConfig();
         config.setString("remote", "origin" ,"fetch", "+refs/heads/*:refs/remotes/origin/*");
@@ -162,29 +152,6 @@ public class GitIT {
         remoteConfig.update(config);
         config.save();
     }
-
-    private static final class RepositoryResolverImplementation implements
-            RepositoryResolver<DaemonClient> {
-        @Override
-        public Repository open(DaemonClient client, String name)
-                throws RepositoryNotFoundException,
-                ServiceNotAuthorizedException, ServiceNotEnabledException,
-                ServiceMayNotContinueException {
-            Repository repo = repositories.get(name);
-            if (repo == null) {
-                try {
-                    repo = new InMemoryRepository(new DfsRepositoryDescription(name));
-                    repo.create(true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                repositories.put(name, repo);
-            }
-            return repo;
-        }
-    }
-
-    private static Map<String, Repository> repositories = new HashMap<>();
 
     private int getSecondsFromEpoch() {
         return (int) (new Date().getTime() / 1000);
