@@ -7,13 +7,11 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
@@ -21,15 +19,19 @@ import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 public class GitIT {
 
@@ -54,7 +56,7 @@ public class GitIT {
         }
 
         public static Object[] list() {
-            return Stream.of(branches.values()).map(branches -> branches.toString()).toArray();
+            return Stream.of(branches.values()).map(branches::toString).toArray();
         }
     }
 
@@ -94,7 +96,7 @@ public class GitIT {
         git.log();
         startRemoteDaemon();
         configureRemote(git);
-        final Iterable<PushResult> results = git.push().call();
+        git.push().call();
         git.close();
         delete(LOCAL);
         final Git git2 = initialize();
@@ -124,7 +126,7 @@ public class GitIT {
         git.branchCreate().setName(branches.branch1.name()).call();
         git.branchCreate().setName(branches.branch2.name()).call();
         final List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
-        assertArrayEquals(branches.list(), list.stream().map((ref) -> ref.getName()).toArray());
+        assertArrayEquals(branches.list(), list.stream().map(Ref::getName).toArray());
     }
 
     @Test
@@ -139,8 +141,7 @@ public class GitIT {
 
     private void startRemoteDaemon() throws GitAPIException, IOException, URISyntaxException {
         Daemon server = new Daemon(new InetSocketAddress(9418));
-        boolean uploadsEnabled = true;
-        server.getService("git-receive-pack").setEnabled(uploadsEnabled);
+        server.getService("git-receive-pack").setEnabled(true);
         server.setRepositoryResolver(new RepositoryResolverImplementation());
         server.start();
     }
@@ -190,10 +191,12 @@ public class GitIT {
 
     void delete(File f) throws IOException {
         if (f.isDirectory()) {
-            for (File c : f.listFiles())
+            for (File c : f.listFiles()) {
                 delete(c);
+            }
         }
-        if (!f.delete())
+        if (!f.delete()) {
             throw new IOException("Failed to delete file: " + f);
+        }
     }
 }
