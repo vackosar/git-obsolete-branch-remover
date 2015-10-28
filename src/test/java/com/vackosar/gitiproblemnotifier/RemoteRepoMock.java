@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RepoMock {
+public class RemoteRepoMock {
 
     public static final String REPO_URL = "git://localhost/repo.git";
 
