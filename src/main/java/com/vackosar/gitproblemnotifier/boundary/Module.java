@@ -20,10 +20,27 @@ public class Module extends AbstractModule {
     @Provides
     @Singleton
     public Git provideGit() throws GitAPIException {
+        cleanUp();
         return Git.cloneRepository().setDirectory(REPO).setURI(remote).call();
     }
 
+    private void cleanUp() {
+        if (REPO.exists()) {
+            delete(REPO);
+        }
+    }
+
     @Override
-    protected void configure() {
+    protected void configure() {}
+
+    void delete(File f) {
+        if (f.isDirectory()) {
+            for (File c : f.listFiles()) {
+                delete(c);
+            }
+        }
+        if (!f.delete()) {
+            throw new RuntimeException("Failed to delete file: " + f);
+        }
     }
 }

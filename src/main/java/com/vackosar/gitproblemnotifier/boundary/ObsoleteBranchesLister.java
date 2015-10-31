@@ -1,23 +1,29 @@
 package com.vackosar.gitproblemnotifier.boundary;
 
 import com.google.inject.Singleton;
+import com.vackosar.gitproblemnotifier.control.ExtractCommit;
+import com.vackosar.gitproblemnotifier.control.ObsoleteFilter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.revwalk.DepthWalk;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import javax.inject.Inject;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Map.Entry;
+import java.util.Set;
 
 @Singleton
 public class ObsoleteBranchesLister {
 
-    @Inject
-    private Git git;
+    @Inject private Git git;
+    @Inject private ObsoleteFilter obsoleteFilter;
+    @Inject private ExtractCommit extractCommit;
 
-    public List<Map.Entry<Ref, DepthWalk.Commit>> listObsolete() {
-        Objects.nonNull(git);
+    public Set<Entry<Ref, RevCommit>> listObsolete() {
+        git.getRepository()
+                .getAllRefs().entrySet().stream()
+                .filter(entry -> "HEAD".equals(entry.getKey()))
+                .map(extractCommit)
+                .filter(obsoleteFilter);
         return null;
     }
 }
