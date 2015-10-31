@@ -17,11 +17,12 @@ public class ObsoleteBranchesLister {
     @Inject private Git git;
     @Inject private ObsoletePredicate obsoletePredicate;
     @Inject private ExtractCommit extractCommit;
+    @Inject private HeadBranchPredicate headBranchPredicate;
 
     public Set<Entry<Ref, RevCommit>> listObsolete() {
         git.getRepository()
                 .getAllRefs().entrySet().stream()
-                .filter(entry -> "HEAD".equals(entry.getKey()))
+                .filter(headBranchPredicate)
                 .map(extractCommit)
                 .filter(obsoletePredicate);
         return null;
