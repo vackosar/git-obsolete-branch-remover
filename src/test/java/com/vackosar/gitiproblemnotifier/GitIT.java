@@ -68,7 +68,7 @@ public class GitIT implements AutoCloseable {
     @Test
     public void pushAndPull() throws GitAPIException, IOException, InterruptedException, URISyntaxException {
         localRepoMock.commitFile();
-        RemoteRepoMock.start();
+        new RemoteRepoMock(true);
         final Git git = localRepoMock.get();
         configureRemote(git);
         git.push().call();

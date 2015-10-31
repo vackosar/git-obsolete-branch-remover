@@ -24,7 +24,11 @@ public class UnZiper {
             String fileName = ze.getName();
             File newFile = new File(outputFolder.getPath() + File.separator + fileName);
             createParentDirectories(newFile);
-            writeToFile(zis, newFile);
+            if (ze.isDirectory()) {
+                newFile.mkdir();
+            } else {
+                writeToFile(zis, newFile);
+            }
             ze = zis.getNextEntry();
         }
     }
