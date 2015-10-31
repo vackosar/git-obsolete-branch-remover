@@ -2,7 +2,7 @@ package com.vackosar.gitproblemnotifier.boundary;
 
 import com.google.inject.Singleton;
 import com.vackosar.gitproblemnotifier.control.ExtractCommit;
-import com.vackosar.gitproblemnotifier.control.ObsoleteFilter;
+import com.vackosar.gitproblemnotifier.control.ObsoletePredicate;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -15,7 +15,7 @@ import java.util.Set;
 public class ObsoleteBranchesLister {
 
     @Inject private Git git;
-    @Inject private ObsoleteFilter obsoleteFilter;
+    @Inject private ObsoletePredicate obsoletePredicate;
     @Inject private ExtractCommit extractCommit;
 
     public Set<Entry<Ref, RevCommit>> listObsolete() {
@@ -23,7 +23,7 @@ public class ObsoleteBranchesLister {
                 .getAllRefs().entrySet().stream()
                 .filter(entry -> "HEAD".equals(entry.getKey()))
                 .map(extractCommit)
-                .filter(obsoleteFilter);
+                .filter(obsoletePredicate);
         return null;
     }
 }
