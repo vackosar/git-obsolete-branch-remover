@@ -6,9 +6,10 @@ import java.util.zip.ZipInputStream;
 
 public class UnZiper {
 
-    public void act(String zipFile, String outputFolder){
+    public void act(File zip, File outputFolder){
         try{
-            ZipInputStream zis = createZipInputStream(zipFile, outputFolder);
+            createOutputFolder(outputFolder);
+            ZipInputStream zis = createZipInputStream(zip);
             process(outputFolder, zis);
             zis.closeEntry();
             zis.close();
@@ -17,11 +18,11 @@ public class UnZiper {
         }
     }
 
-    private void process(String outputFolder, ZipInputStream zis) throws IOException {
+    private void process(File outputFolder, ZipInputStream zis) throws IOException {
         ZipEntry ze = zis.getNextEntry();
         while(ze!=null){
             String fileName = ze.getName();
-            File newFile = new File(outputFolder + File.separator + fileName);
+            File newFile = new File(outputFolder.getPath() + File.separator + fileName);
             createParentDirectories(newFile);
             writeToFile(zis, newFile);
             ze = zis.getNextEntry();
@@ -42,16 +43,13 @@ public class UnZiper {
         new File(newFile.getParent()).mkdirs();
     }
 
-    private ZipInputStream createZipInputStream(String zipFile, String outputFolder) throws FileNotFoundException {
-        createOutputFolder(outputFolder);
-
-        return new ZipInputStream(new FileInputStream(zipFile));
+    private ZipInputStream createZipInputStream(File zip) throws FileNotFoundException {
+        return new ZipInputStream(new FileInputStream(zip));
     }
 
-    private void createOutputFolder(String outputFolder) {
-        File folder = new File(outputFolder);
-        if(!folder.exists()){
-            folder.mkdir();
+    private void createOutputFolder(File outputFolder) {
+        if(!outputFolder.exists()){
+            outputFolder.mkdir();
         }
     }
 }
