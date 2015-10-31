@@ -18,10 +18,6 @@ public class ObsoletePredicate implements Predicate<BranchInfo> {
         walk = new RevWalk(git.getRepository());
     }
 
-    private LocalDateTime getSecondsFromEpoch() {
-        return LocalDateTime.now();
-    }
-
     @Override
     public boolean test(BranchInfo entry) {
         return Duration.between(entry.lastCommit, LocalDateTime.now()).compareTo(difference) > 0;
