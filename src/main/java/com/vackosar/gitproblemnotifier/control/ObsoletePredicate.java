@@ -2,32 +2,28 @@ package com.vackosar.gitproblemnotifier.control;
 
 import com.google.inject.Inject;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import java.util.Date;
-import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
-public class ObsoletePredicate implements Predicate<Map.Entry<String, RevCommit>> {
+public class ObsoletePredicate implements Predicate<BranchInfo> {
 
     private final RevWalk walk;
-    private int differenceTime = 10;
+    private Duration difference = Duration.ofSeconds(0);
 
     @Inject
     public ObsoletePredicate(Git git) {
         walk = new RevWalk(git.getRepository());
     }
 
-    private int getSecondsFromEpoch() {
-        return (int) (new Date().getTime() / 1000);
+    private LocalDateTime getSecondsFromEpoch() {
+        return LocalDateTime.now();
     }
 
     @Override
-    public boolean test(Map.Entry<String, RevCommit> entry) {
-        final int commitTime;
-        commitTime = entry.getValue().getCommitTime();
-        final int currentTime = getSecondsFromEpoch();
-        return commitTime - currentTime > differenceTime;
+    public boolean test(BranchInfo entry) {
+        return Duration.between(entry.lastCommit, LocalDateTime.now()).compareTo(difference) > 0;
     }
 }

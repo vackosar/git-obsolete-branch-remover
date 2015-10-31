@@ -1,4 +1,4 @@
-package com.vackosar.gitproblemnotifier.boundary;
+package com.vackosar.gitproblemnotifier.control;
 
 import org.eclipse.jgit.lib.Ref;
 

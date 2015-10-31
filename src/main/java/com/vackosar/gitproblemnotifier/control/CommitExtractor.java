@@ -11,12 +11,12 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ExtractCommit implements Function<Map.Entry<String, Ref>, Map.Entry<String, RevCommit>> {
+public class CommitExtractor implements Function<Map.Entry<String, Ref>, Map.Entry<String, RevCommit>> {
 
     private final RevWalk walk;
 
     @Inject
-    public ExtractCommit(Git git) {
+    public CommitExtractor(Git git) {
         walk = new RevWalk(git.getRepository());
     }
 
