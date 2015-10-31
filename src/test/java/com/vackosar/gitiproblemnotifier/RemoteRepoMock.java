@@ -5,12 +5,14 @@ import org.eclipse.jgit.transport.Daemon;
 import java.io.File;
 import java.net.InetSocketAddress;
 
-public class RemoteRepoMock {
+public class RemoteRepoMock implements AutoCloseable {
 
     public static final String REPO_URL = "git://localhost/repo.git";
     private static final File DATA_ZIP = new File("src/test/resource/.git.zip");
     private static final File REPO_DIR = new File("tmp/remote");
     private boolean bare;
+    private Daemon server;
+    private RepoResolver resolver;
 
     public RemoteRepoMock(boolean bare) {
         this.bare = bare;
@@ -37,9 +39,10 @@ public class RemoteRepoMock {
 
     private void start() {
         try {
-            Daemon server = new Daemon(new InetSocketAddress(9418));
+            server = new Daemon(new InetSocketAddress(9418));
             server.getService("git-receive-pack").setEnabled(true);
-            server.setRepositoryResolver(new RepoResolver(REPO_DIR, bare));
+            resolver = new RepoResolver(REPO_DIR, bare);
+            server.setRepositoryResolver(resolver);
             server.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -48,5 +51,12 @@ public class RemoteRepoMock {
 
     private void prepareTestingData() {
         new UnZiper().act(DATA_ZIP, REPO_DIR);
+    }
+
+    @Override
+    public void close() throws Exception {
+        server.stop();
+        resolver.close();
+        delete(REPO_DIR);
     }
 }

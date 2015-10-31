@@ -30,6 +30,10 @@ public class Module extends AbstractModule {
         }
     }
 
+    protected void finalize() {
+        cleanUp();
+    }
+
     @Override
     protected void configure() {}
 

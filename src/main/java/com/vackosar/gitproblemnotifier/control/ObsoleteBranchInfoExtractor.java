@@ -23,7 +23,6 @@ public class ObsoleteBranchInfoExtractor implements Function<Map.Entry<String, R
     }
 
     private LocalDateTime extractCommitTime(Map.Entry<String, RevCommit> entry) {
-        final ZoneOffset offset = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
-        return LocalDateTime.ofEpochSecond(entry.getValue().getCommitTime(), 0, offset);
+        return LocalDateTime.ofInstant(entry.getValue().getAuthorIdent().getWhen().toInstant(), ZoneOffset.systemDefault());
     }
 }

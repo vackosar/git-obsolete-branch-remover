@@ -9,8 +9,9 @@ import java.io.IOException;
 public class ObsoleteBranchesListerIT {
 
     @Test
-    public void inject() throws GitAPIException, IOException {
-        final RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
-        Main.main(new String[] {RemoteRepoMock.REPO_URL});
+    public void inject() throws Exception {
+        try (RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);){
+            Main.main(new String[] {RemoteRepoMock.REPO_URL});
+        }
     }
 }

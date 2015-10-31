@@ -1,21 +1,26 @@
 package com.vackosar.gitiproblemnotifier;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryBuilder;
+import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.DaemonClient;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
+import org.eclipse.jgit.util.FS;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RepoResolver implements RepositoryResolver<DaemonClient> {
+public class RepoResolver implements RepositoryResolver<DaemonClient>, AutoCloseable {
 
+    private static final String DOT_GIT = ".git";
     private Map<String, Repository> repositories = new HashMap<>();
     private final File repoDir;
     private final boolean bare;
@@ -43,13 +48,26 @@ public class RepoResolver implements RepositoryResolver<DaemonClient> {
     private Repository createRepo() {
         Repository repo;
         try {
-            repo = new FileRepositoryBuilder().setGitDir(repoDir).build();
             if (bare) {
+                repo = new FileRepositoryBuilder().setGitDir(repoDir).build();
                 repo.create(true);
+            } else {
+                repo = new FileRepositoryBuilder()
+                        .setGitDir(new File(repoDir, DOT_GIT))
+                        .setMustExist(true).build();
             }
+            repo.scanForRepoChanges();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return repo;
+    }
+
+    @Override
+    public void close() throws Exception {
+        for (Map.Entry<String, Repository> repository: repositories.entrySet()) {
+            repository.getValue().close();
+        }
     }
 }

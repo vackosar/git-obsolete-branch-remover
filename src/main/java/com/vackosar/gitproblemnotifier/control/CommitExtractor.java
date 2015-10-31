@@ -11,7 +11,7 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class CommitExtractor implements Function<Map.Entry<String, Ref>, Map.Entry<String, RevCommit>> {
+public class CommitExtractor implements Function<Ref, Map.Entry<String, RevCommit>> {
 
     private final RevWalk walk;
 
@@ -21,10 +21,10 @@ public class CommitExtractor implements Function<Map.Entry<String, Ref>, Map.Ent
     }
 
     @Override
-    public Map.Entry<String, RevCommit> apply(Map.Entry<String, Ref> entry) {
+    public Map.Entry<String, RevCommit> apply(Ref ref) {
         try {
-            final RevCommit commit = walk.parseCommit(entry.getValue().getObjectId());
-            final String branchname = entry.getKey();
+            final RevCommit commit = walk.parseCommit(ref.getObjectId());
+            final String branchname = ref.getName();
             return new AbstractMap.SimpleImmutableEntry<>(branchname, commit);
         } catch (IOException e) {
             throw new RuntimeException(e);

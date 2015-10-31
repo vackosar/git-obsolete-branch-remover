@@ -1,6 +1,10 @@
 package com.vackosar.gitiproblemnotifier;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.FileTime;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -29,6 +33,8 @@ public class UnZiper {
             } else {
                 writeToFile(zis, newFile);
             }
+            newFile.setLastModified(ze.getLastModifiedTime().toMillis());
+            setFileCreationDate(newFile, ze.getLastModifiedTime());
             ze = zis.getNextEntry();
         }
     }
@@ -55,5 +61,10 @@ public class UnZiper {
         if(!outputFolder.exists()){
             outputFolder.mkdir();
         }
+    }
+
+    public void setFileCreationDate(File file, FileTime creationDate) throws IOException{
+        BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(file.getPath()), BasicFileAttributeView.class);
+        attributes.setTimes(creationDate, creationDate, creationDate);
     }
 }
