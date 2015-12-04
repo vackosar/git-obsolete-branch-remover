@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -96,14 +97,19 @@ public class GitIT implements AutoCloseable {
         final RevWalk walk = new RevWalk(git.getRepository());
         final RevTree tree = walk.parseCommit(allRefs.get("HEAD").getObjectId()).getTree();
         final TreeWalk treeWalk = new TreeWalk(git.getRepository());
-        final RevTree parentTree = walk.parseCommit(allRefs.get("HEAD").getObjectId()).getParents()[0].getTree();
+        final ObjectId parentId = walk.parseCommit(allRefs.get("HEAD").getObjectId()).getParents()[0].getId();
+        final RevTree parentTree = walk.parseCommit(parentId).getTree();
         treeWalk.addTree(tree);
-//        treeWalk.addTree(parentTree);
+        treeWalk.addTree(parentTree);
         treeWalk.setFilter(TreeFilter.ANY_DIFF);
         while (treeWalk.next()) {
-//            Assert.assertEquals(fileName, treeWalk.getPathString());
-            System.out.println(treeWalk.getPathString());
+            assertTreeIsFlat(treeWalk);
+            Assert.assertEquals(fileName, treeWalk.getPathString());
         }
+    }
+
+    private void assertTreeIsFlat(TreeWalk treeWalk) {
+        Assert.assertEquals(0, treeWalk.getDepth());
     }
 
     @Test
