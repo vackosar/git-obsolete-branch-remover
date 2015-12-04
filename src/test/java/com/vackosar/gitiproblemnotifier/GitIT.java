@@ -90,6 +90,7 @@ public class GitIT implements AutoCloseable {
 
     @Test
     public void listFilesInLastCommit() throws IOException, GitAPIException {
+        localRepoMock.commitRandomFile();
         final String fileName = localRepoMock.commitRandomFile();
         final Git git = localRepoMock.get();
         final Map<String, Ref> allRefs = git.getRepository().getAllRefs();
