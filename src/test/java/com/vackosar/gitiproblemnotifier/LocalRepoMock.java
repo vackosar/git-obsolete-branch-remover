@@ -5,6 +5,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
+
 import static org.junit.Assert.*;
 
 public class LocalRepoMock implements AutoCloseable {
@@ -48,6 +50,14 @@ public class LocalRepoMock implements AutoCloseable {
         git.commit().setMessage(MESSAGE).call();
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, PATH.list());
     }
+
+    public void commitRandomFile() throws IOException, GitAPIException {
+        final File randomFile = new File(PATH.getPath() + "/" + new Integer(new Random().nextInt()) + ".txt");
+        randomFile.createNewFile();
+        git.add().addFilepattern(ALL_FILES).call();
+        git.commit().setMessage(MESSAGE).call();
+    }
+
 
     public void deleteFile() {
         FILE.delete();

@@ -7,10 +7,13 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,6 +87,20 @@ public class GitIT implements AutoCloseable {
         assertArrayEquals(new String[]{localRepoMock.REPODIRNAME, localRepoMock.FILE.getName()}, localRepoMock.PATH.list());
     }
 
+    @Test
+    public void listFilesInLastCommit() throws IOException, GitAPIException {
+        localRepoMock.commitRandomFile();
+        final Git git = localRepoMock.get();
+        final Map<String, Ref> allRefs = git.getRepository().getAllRefs();
+        final RevWalk walk = new RevWalk(git.getRepository());
+        final RevTree tree = walk.parseCommit(allRefs.get("HEAD").getObjectId()).getTree();
+        final TreeWalk treeWalk = new TreeWalk(git.getRepository());
+        treeWalk.addTree(tree);
+        treeWalk.setFilter(TreeFilter.ANY_DIFF);
+        while (treeWalk.next()) {
+            System.out.append("path: ").println(treeWalk.getPathString());
+        }
+    }
 
     @Test
     public void listBranches() throws GitAPIException {
