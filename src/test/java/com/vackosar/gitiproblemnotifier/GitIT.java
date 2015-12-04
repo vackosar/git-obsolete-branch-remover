@@ -87,7 +87,6 @@ public class GitIT implements AutoCloseable {
     }
 
     @Test
-    @Ignore
     public void listFilesInLastCommit() throws IOException, GitAPIException {
         localRepoMock.commitRandomFile();
         localRepoMock.commitRandomFile();
