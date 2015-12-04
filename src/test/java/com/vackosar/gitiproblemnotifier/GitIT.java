@@ -15,6 +15,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -89,7 +90,7 @@ public class GitIT implements AutoCloseable {
 
     @Test
     public void listFilesInLastCommit() throws IOException, GitAPIException {
-        localRepoMock.commitRandomFile();
+        final String fileName = localRepoMock.commitRandomFile();
         final Git git = localRepoMock.get();
         final Map<String, Ref> allRefs = git.getRepository().getAllRefs();
         final RevWalk walk = new RevWalk(git.getRepository());
@@ -97,9 +98,8 @@ public class GitIT implements AutoCloseable {
         final TreeWalk treeWalk = new TreeWalk(git.getRepository());
         treeWalk.addTree(tree);
         treeWalk.setFilter(TreeFilter.ANY_DIFF);
-        while (treeWalk.next()) {
-            System.out.append("path: ").println(treeWalk.getPathString());
-        }
+        Assert.assertTrue(treeWalk.next());
+        Assert.assertEquals(fileName, treeWalk.getPathString());
     }
 
     @Test

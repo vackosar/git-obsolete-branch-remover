@@ -51,11 +51,12 @@ public class LocalRepoMock implements AutoCloseable {
         assertArrayEquals(new String[]{REPODIRNAME, FILE.getName()}, PATH.list());
     }
 
-    public void commitRandomFile() throws IOException, GitAPIException {
+    public String commitRandomFile() throws IOException, GitAPIException {
         final File randomFile = new File(PATH.getPath() + "/" + new Integer(new Random().nextInt()) + ".txt");
         randomFile.createNewFile();
         git.add().addFilepattern(ALL_FILES).call();
         git.commit().setMessage(MESSAGE).call();
+        return randomFile.getName();
     }
 
 
