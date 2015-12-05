@@ -94,17 +94,20 @@ public class GitIT implements AutoCloseable {
         final Git git = localRepoMock.get();
         final Map<String, Ref> allRefs = git.getRepository().getAllRefs();
         final RevWalk walk = new RevWalk(git.getRepository());
-        final RevTree tree = walk.parseCommit(allRefs.get("HEAD").getObjectId()).getTree();
+        final RevCommit commit = walk.parseCommit(allRefs.get("HEAD").getObjectId());
+        final RevTree tree = commit.getTree();
         final TreeWalk treeWalk = new TreeWalk(git.getRepository());
-        final ObjectId parentId = walk.parseCommit(allRefs.get("HEAD").getObjectId()).getParents()[0].getId();
-        final RevTree parentTree = walk.parseCommit(parentId).getTree();
-        treeWalk.addTree(tree);
-        treeWalk.addTree(parentTree);
-        treeWalk.setFilter(TreeFilter.ANY_DIFF);
-        while (treeWalk.next()) {
-            assertTreeIsFlat(treeWalk);
-            Assert.assertEquals(fileName, treeWalk.getPathString());
+        for (RevCommit parentCommit : commit.getParents()) {
+            final ObjectId parentId = parentCommit.getId();
+            final RevTree parentTree = walk.parseCommit(parentId).getTree();
+            treeWalk.addTree(parentTree);
         }
+        treeWalk.addTree(tree);
+        treeWalk.setFilter(TreeFilter.ANY_DIFF);
+        Assert.assertTrue(treeWalk.next());
+        assertTreeIsFlat(treeWalk);
+        Assert.assertEquals(fileName, treeWalk.getPathString());
+        Assert.assertFalse(treeWalk.next());
     }
 
     private void assertTreeIsFlat(TreeWalk treeWalk) {
