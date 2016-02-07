@@ -23,7 +23,6 @@ public class MainTest {
         ){
             workDir = ORIG_WORK_DIR.resolve("tmp/local");
             System.setProperty(USER_DIR, workDir.toString());
-//            RemoteRepoMock.configureRemote(localRepoMock.get());
             Main.main(new String[]{});
         }
     }
