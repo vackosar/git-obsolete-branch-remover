@@ -3,6 +3,7 @@ package com.vackosar.gitproblemnotifier.boundary;
 import com.google.inject.Singleton;
 import com.vackosar.gitproblemnotifier.control.*;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import javax.inject.Inject;
@@ -18,7 +19,11 @@ public class ObsoleteBranchesLister {
     @Inject private ObsoleteBranchInfoExtractor obsoleteBranchInfoExtractor;
 
     public List<BranchInfo> listObsolete() throws GitAPIException {
-        return git.branchList().call().stream()
+        return git
+                .branchList()
+                .setListMode(ListBranchCommand.ListMode.REMOTE)
+                .call()
+                .stream()
                 .map(commitExtractor)
                 .map(obsoleteBranchInfoExtractor)
                 .filter(obsoletePredicate)

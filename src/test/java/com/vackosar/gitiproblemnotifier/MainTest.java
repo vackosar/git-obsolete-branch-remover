@@ -6,10 +6,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-public class ObsoleteBranchesListerIT {
+public class MainTest {
 
     @Test
-    public void inject() throws Exception {
+    public void list() throws Exception {
         try (RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);){
             Main.main(new String[] {RemoteRepoMock.REPO_URL});
         }

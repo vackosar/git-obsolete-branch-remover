@@ -5,13 +5,14 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
 public class ObsoletePredicate implements Predicate<BranchInfo> {
 
     private final RevWalk walk;
-    private Duration difference = Duration.ofSeconds(0);
+    private Duration difference = Duration.ofDays(0);
 
     @Inject
     public ObsoletePredicate(Git git) {
@@ -20,6 +21,6 @@ public class ObsoletePredicate implements Predicate<BranchInfo> {
 
     @Override
     public boolean test(BranchInfo entry) {
-        return Duration.between(entry.lastCommit, LocalDateTime.now()).compareTo(difference) > 0;
+        return Duration.between(entry.lastCommit.atStartOfDay(), LocalDateTime.now()).compareTo(difference) > 0;
     }
 }

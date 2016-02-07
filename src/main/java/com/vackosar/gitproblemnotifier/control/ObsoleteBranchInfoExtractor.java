@@ -3,6 +3,7 @@ package com.vackosar.gitproblemnotifier.control;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
@@ -12,7 +13,7 @@ public class ObsoleteBranchInfoExtractor implements Function<Map.Entry<String, R
 
     @Override
     public BranchInfo apply(Map.Entry<String, RevCommit> entry) {
-        final LocalDateTime commitTime = extractCommitTime(entry);
+        final LocalDate commitTime = extractCommitTime(entry);
         final String branchName = entry.getKey();
         final String email = extractEmail(entry);
         return new BranchInfo(commitTime, branchName, email);
@@ -22,7 +23,13 @@ public class ObsoleteBranchInfoExtractor implements Function<Map.Entry<String, R
         return entry.getValue().getAuthorIdent().getEmailAddress();
     }
 
-    private LocalDateTime extractCommitTime(Map.Entry<String, RevCommit> entry) {
-        return LocalDateTime.ofInstant(entry.getValue().getAuthorIdent().getWhen().toInstant(), ZoneOffset.systemDefault());
+    private LocalDate extractCommitTime(Map.Entry<String, RevCommit> entry) {
+        return LocalDateTime
+                .ofInstant(extractInstant(entry), ZoneOffset.systemDefault())
+                .toLocalDate();
+    }
+
+    private Instant extractInstant(Map.Entry<String, RevCommit> entry) {
+        return entry.getValue().getAuthorIdent().getWhen().toInstant();
     }
 }
