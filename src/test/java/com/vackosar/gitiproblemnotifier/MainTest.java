@@ -1,11 +1,11 @@
 package com.vackosar.gitiproblemnotifier;
 
 import com.vackosar.gitproblemnotifier.boundary.Main;
-import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -23,7 +23,16 @@ public class MainTest {
         ){
             workDir = ORIG_WORK_DIR.resolve("tmp/local");
             System.setProperty(USER_DIR, workDir.toString());
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(out));
             Main.main(new String[]{});
+            final String[] actual = out.toString().split(System.lineSeparator());
+            final String[] expected = {
+                    "branch1\t2015-11-01\tvackosar@github.com",
+                    "branch2\t2015-11-01\tvackosar@github.com",
+                    "master\t2015-11-01\tvackosar@github.com"
+            };
+            Assert.assertArrayEquals(expected, actual);
         }
     }
 }
