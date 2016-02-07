@@ -1,3 +1,5 @@
 .idea
 container
+/target
+!/target/*.zip
 /tmp
