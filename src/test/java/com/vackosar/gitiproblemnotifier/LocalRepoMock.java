@@ -2,6 +2,7 @@ package com.vackosar.gitiproblemnotifier;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,16 @@ public class LocalRepoMock implements AutoCloseable {
         PATH.mkdir();
         git = Git.init().setDirectory(PATH).call();
         git.commit().setMessage(MESSAGE).call();
+    }
+
+    public LocalRepoMock(String remote) throws GitAPIException {
+        try {
+            close();
+        } catch (RuntimeException e) {
+            //
+        }
+        PATH.mkdir();
+        git = Git.cloneRepository().setDirectory(PATH).setURI(remote).call();
     }
 
     public Git get() {
@@ -74,6 +85,5 @@ public class LocalRepoMock implements AutoCloseable {
             throw new RuntimeException("Failed to delete file: " + f);
         }
     }
-
 
 }

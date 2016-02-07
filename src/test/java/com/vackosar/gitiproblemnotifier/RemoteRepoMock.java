@@ -1,9 +1,16 @@
 package com.vackosar.gitiproblemnotifier;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.Daemon;
+import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 
 public class RemoteRepoMock implements AutoCloseable {
 
@@ -58,5 +65,21 @@ public class RemoteRepoMock implements AutoCloseable {
         server.stop();
         resolver.close();
         delete(REPO_DIR);
+    }
+
+    public static void configureRemote(Git git) throws URISyntaxException, IOException {
+        StoredConfig config = git.getRepository().getConfig();
+        config.setString("remote", "origin" ,"fetch", "+refs/heads/*:refs/remotes/origin/*");
+        config.setString("remote", "origin" ,"push", "+refs/heads/*:refs/remotes/origin/*");
+        config.setString("branch", "master", "remote", "origin");
+        config.setString("branch", "master", "merge", "refs/heads/master");
+        config.setString("push", null, "default", "current");
+        RemoteConfig remoteConfig = new RemoteConfig(config, "origin");
+        URIish uri = new URIish(RemoteRepoMock.REPO_URL);
+        remoteConfig.addURI(uri);
+        remoteConfig.addFetchRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
+        remoteConfig.addPushRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
+        remoteConfig.update(config);
+        config.save();
     }
 }

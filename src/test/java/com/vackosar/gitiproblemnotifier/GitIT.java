@@ -72,11 +72,11 @@ public class GitIT implements AutoCloseable {
         localRepoMock.commitFile();
         new RemoteRepoMock(true);
         final Git git = localRepoMock.get();
-        configureRemote(git);
+        RemoteRepoMock.configureRemote(git);
         git.push().call();
         localRepoMock.close();
         localRepoMock = new LocalRepoMock();
-        configureRemote(git);
+        RemoteRepoMock.configureRemote(git);
         final Git git2 = localRepoMock.get();
         git2.pull().call();
         assertFileIsPresent();
@@ -135,22 +135,6 @@ public class GitIT implements AutoCloseable {
         RevCommit commit = walk.parseCommit(ref.getObjectId());
         Thread.sleep(1000);
         assertTrue(getSecondsFromEpoch() - commit.getCommitTime() > 0);
-    }
-
-    private void configureRemote(Git git) throws URISyntaxException, IOException {
-        StoredConfig config = git.getRepository().getConfig();
-        config.setString("remote", "origin" ,"fetch", "+refs/heads/*:refs/remotes/origin/*");
-        config.setString("remote", "origin" ,"push", "+refs/heads/*:refs/remotes/origin/*");
-        config.setString("branch", "master", "remote", "origin");
-        config.setString("branch", "master", "merge", "refs/heads/master");
-        config.setString("push", null, "default", "current");
-        RemoteConfig remoteConfig = new RemoteConfig(config, "origin");
-        URIish uri = new URIish(RemoteRepoMock.REPO_URL);
-        remoteConfig.addURI(uri);
-        remoteConfig.addFetchRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
-        remoteConfig.addPushRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
-        remoteConfig.update(config);
-        config.save();
     }
 
     private int getSecondsFromEpoch() {

@@ -7,31 +7,23 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Module extends AbstractModule {
 
-    private static final File REPO = new File("tmp/repo");
-    private final String remote;
+    private static final File WORK_DIR = new File(System.getProperty("user.dir"));
 
-    public Module(String remote) {
-        this.remote = remote;
+    public Module() {
     }
 
     @Provides
     @Singleton
     public Git provideGit() throws GitAPIException {
-        cleanUp();
-        return Git.cloneRepository().setDirectory(REPO).setURI(remote).call();
-    }
-
-    private void cleanUp() {
-        if (REPO.exists()) {
-            delete(REPO);
+        try {
+            return Git.open(WORK_DIR);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    protected void finalize() {
-        cleanUp();
     }
 
     @Override
