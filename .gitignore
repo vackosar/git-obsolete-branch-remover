@@ -1,5 +1,5 @@
 .idea
 container
-/target
-!/target/*.zip
+/target/*
+/target/*.jar
 /tmp
