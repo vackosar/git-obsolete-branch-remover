@@ -25,7 +25,7 @@ public class MainTest {
             System.setProperty(USER_DIR, workDir.toString());
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             System.setOut(new PrintStream(out));
-            Main.main(new String[]{});
+            Main.main(new String[]{"30"});
             final String[] actual = out.toString().split(System.lineSeparator());
             final String[] expected = {
                     "branch1\t2015-11-01\tvackosar@github.com",

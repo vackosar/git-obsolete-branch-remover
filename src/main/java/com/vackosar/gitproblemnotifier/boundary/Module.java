@@ -3,6 +3,7 @@ package com.vackosar.gitproblemnotifier.boundary;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.vackosar.gitproblemnotifier.control.ObsoletePredicate;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -12,8 +13,10 @@ import java.io.IOException;
 public class Module extends AbstractModule {
 
     private static final File WORK_DIR = new File(System.getProperty("user.dir"));
+    private final Integer days;
 
-    public Module() {
+    public Module(Integer days) {
+        this.days = days;
     }
 
     @Provides
@@ -24,6 +27,12 @@ public class Module extends AbstractModule {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Provides
+    @Singleton
+    public ObsoletePredicate provideObsoletePredicate(Git git) {
+        return new ObsoletePredicate(git, days);
     }
 
     @Override

@@ -8,7 +8,11 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 
 public class Main {
     public static void main(String[] args) throws GitAPIException {
-        final Injector injector = Guice.createInjector(new Module());
+        if (args.length != 1) {
+            System.err.println("Usage example: gpn [number of days to obsolete day]");
+        }
+        Integer days = Integer.valueOf(args[0]);
+        final Injector injector = Guice.createInjector(new Module(days));
         injector
                 .getInstance(ObsoleteBranchesLister.class)
                 .listObsolete().stream()
