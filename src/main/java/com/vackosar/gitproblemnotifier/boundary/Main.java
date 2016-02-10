@@ -12,10 +12,13 @@ import java.nio.file.Paths;
 public class Main {
     public static void main(String[] args) throws GitAPIException {
         Path key;
+        Integer days;
         if (isSingleParam(args)) {
             key = Module.NO_KEY;
+            days = Integer.valueOf(args[0]);
         } else if (isThreeParam(args)) {
             key = Paths.get(args[1]);
+            days = Integer.valueOf(args[2]);
         } else {
             System.err.println("Usage examples: ");
             System.err.println("  gpn [number of days to obsolete day]");
@@ -23,7 +26,6 @@ public class Main {
             Runtime.getRuntime().exit(1);
             return;
         }
-        Integer days = Integer.valueOf(args[0]);
         final Injector injector = Guice.createInjector(new Module(days, key));
         injector
                 .getInstance(ObsoleteBranchesLister.class)
