@@ -3,6 +3,7 @@ package com.vackosar.gitproblemnotifier.boundary;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.vackosar.gitproblemnotifier.control.Arguments;
 import com.vackosar.gitproblemnotifier.control.ObsoletePredicate;
 import com.vackosar.gitproblemnotifier.control.SshTrasportCallback;
 import org.eclipse.jgit.api.Git;
@@ -16,13 +17,11 @@ import java.nio.file.Path;
 public class Module extends AbstractModule {
 
     private static final File WORK_DIR = new File(System.getProperty("user.dir"));
-    private final Integer days;
-    private final Path key;
+    private final Arguments args;
     public static final Path NO_KEY = null;
 
-    public Module(Integer days, Path key) {
-        this.days = days;
-        this.key = key;
+    public Module(Arguments args) {
+        this.args = args;
     }
 
     @Provides
@@ -32,7 +31,7 @@ public class Module extends AbstractModule {
             final Git git = Git.open(WORK_DIR);
             git
                     .fetch()
-                    .setTransportConfigCallback(createTransportConfigCallback(key))
+                    .setTransportConfigCallback(createTransportConfigCallback(args.key))
                     .call();
             return git;
         } catch (IOException e) {
@@ -47,7 +46,7 @@ public class Module extends AbstractModule {
     @Provides
     @Singleton
     public ObsoletePredicate provideObsoletePredicate(Git git) {
-        return new ObsoletePredicate(git, days);
+        return new ObsoletePredicate(git, args.days);
     }
 
     @Override

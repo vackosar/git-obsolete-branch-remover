@@ -9,4 +9,9 @@ public class MainIT {
     public void fetch() throws GitAPIException {
         try (LocalRepoMock localRepoMock = new LocalRepoMock(RemoteSshRepo.URL);){}
     }
+
+    @Test
+    public void parseKey() {
+
+    }
 }
