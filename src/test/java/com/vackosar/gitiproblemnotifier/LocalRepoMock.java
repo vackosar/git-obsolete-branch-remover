@@ -1,14 +1,16 @@
 package com.vackosar.gitiproblemnotifier;
 
+import com.vackosar.gitproblemnotifier.control.SshTrasportCallback;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 public class LocalRepoMock implements AutoCloseable {
 
@@ -18,6 +20,7 @@ public class LocalRepoMock implements AutoCloseable {
     public static final File FILE = new File(PATH.getPath() + "/" + FILENAME);
     public static final String REPODIRNAME = ".git";
     private static final String ALL_FILES = ".";
+    private static final Path KEY = Paths.get(System.getProperty("user.home") + "/.ssh/id_rsa");
 
     private final Git git;
 
@@ -39,7 +42,12 @@ public class LocalRepoMock implements AutoCloseable {
             //
         }
         PATH.mkdir();
-        git = Git.cloneRepository().setDirectory(PATH).setURI(remote).call();
+        git = Git
+                .cloneRepository()
+                .setDirectory(PATH)
+                .setURI(remote)
+                .setTransportConfigCallback(new SshTrasportCallback(KEY))
+                .call();
     }
 
     public Git get() {

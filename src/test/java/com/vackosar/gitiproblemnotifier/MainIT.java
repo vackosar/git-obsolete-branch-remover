@@ -7,10 +7,6 @@ public class MainIT {
 
     @Test
     public void fetch() throws GitAPIException {
-        try (
-                LocalRepoMock localRepoMock = new LocalRepoMock(RemoteSshRepo.URL);
-        ){
-
-        }
+        try (LocalRepoMock localRepoMock = new LocalRepoMock(RemoteSshRepo.URL);){}
     }
 }
