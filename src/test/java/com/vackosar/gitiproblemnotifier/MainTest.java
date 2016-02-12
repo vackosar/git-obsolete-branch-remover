@@ -13,7 +13,6 @@ public class MainTest {
 
     private static final String USER_DIR = "user.dir";
     private static final Path ORIG_WORK_DIR = Paths.get(System.getProperty(USER_DIR));
-    private Path workDir;
 
     @Test
     public void list() throws Exception {
@@ -21,7 +20,7 @@ public class MainTest {
                 RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
                 LocalRepoMock localRepoMock = new LocalRepoMock(RemoteRepoMock.REPO_URL);
         ){
-            workDir = ORIG_WORK_DIR.resolve("tmp/local");
+            Path workDir = ORIG_WORK_DIR.resolve("tmp/local");
             System.setProperty(USER_DIR, workDir.toString());
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             System.setOut(new PrintStream(out));
