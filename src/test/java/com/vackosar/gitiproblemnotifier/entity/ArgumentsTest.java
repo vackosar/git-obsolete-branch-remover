@@ -1,6 +1,6 @@
-package com.vackosar.gitiproblemnotifier;
+package com.vackosar.gitiproblemnotifier.entity;
 
-import com.vackosar.gitproblemnotifier.control.Arguments;
+import com.vackosar.gitproblemnotifier.entity.Arguments;
 import org.junit.Test;
 
 public class ArgumentsTest {

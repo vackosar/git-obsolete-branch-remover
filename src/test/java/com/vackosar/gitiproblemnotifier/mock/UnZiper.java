@@ -1,4 +1,4 @@
-package com.vackosar.gitiproblemnotifier;
+package com.vackosar.gitiproblemnotifier.mock;
 
 import java.io.*;
 import java.nio.file.Files;

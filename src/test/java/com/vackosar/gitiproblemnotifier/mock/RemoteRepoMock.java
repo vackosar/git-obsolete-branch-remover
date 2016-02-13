@@ -1,4 +1,4 @@
-package com.vackosar.gitiproblemnotifier;
+package com.vackosar.gitiproblemnotifier.mock;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;

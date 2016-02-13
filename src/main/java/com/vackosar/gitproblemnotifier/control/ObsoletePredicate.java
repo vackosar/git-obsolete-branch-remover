@@ -1,20 +1,20 @@
 package com.vackosar.gitproblemnotifier.control;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.revwalk.RevWalk;
+import com.vackosar.gitproblemnotifier.entity.Arguments;
+import com.vackosar.gitproblemnotifier.entity.BranchInfo;
 
+import javax.inject.Inject;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
 public class ObsoletePredicate implements Predicate<BranchInfo> {
 
-    private final RevWalk walk;
     private Duration difference = Duration.ofDays(0);
 
-    public ObsoletePredicate(Git git, Integer days) {
-        walk = new RevWalk(git.getRepository());
-        difference = Duration.ofDays(days);
+    @Inject
+    public ObsoletePredicate(Arguments arguments) {
+        difference = Duration.ofDays(arguments.days);
     }
 
     @Override

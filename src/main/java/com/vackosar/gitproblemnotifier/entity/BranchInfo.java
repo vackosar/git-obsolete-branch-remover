@@ -1,4 +1,4 @@
-package com.vackosar.gitproblemnotifier.control;
+package com.vackosar.gitproblemnotifier.entity;
 
 import java.time.LocalDate;
 
@@ -13,7 +13,7 @@ public class BranchInfo {
         this.email = email;
     }
 
-    public String convertToOutputLine() {
+    public String toOutputLine() {
         return branchName.replaceFirst("refs/remotes/origin/", "")
                 + "\t" + lastCommit
                 + "\t" + email;

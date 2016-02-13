@@ -1,4 +1,4 @@
-package com.vackosar.gitproblemnotifier.control;
+package com.vackosar.gitproblemnotifier.entity;
 
 import com.vackosar.gitproblemnotifier.boundary.Module;
 

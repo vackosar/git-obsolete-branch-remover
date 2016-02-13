@@ -1,4 +1,4 @@
-package com.vackosar.gitiproblemnotifier;
+package com.vackosar.gitiproblemnotifier.mock;
 
 import com.vackosar.gitproblemnotifier.control.SshTrasportCallback;
 import org.eclipse.jgit.api.Git;

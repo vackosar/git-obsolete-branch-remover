@@ -1,5 +1,6 @@
 package com.vackosar.gitproblemnotifier.control;
 
+import com.vackosar.gitproblemnotifier.entity.BranchInfo;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.time.Instant;

@@ -2,8 +2,9 @@ package com.vackosar.gitproblemnotifier.boundary;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.vackosar.gitproblemnotifier.control.Arguments;
-import com.vackosar.gitproblemnotifier.control.BranchInfo;
+import com.vackosar.gitproblemnotifier.control.ObsoleteBranches;
+import com.vackosar.gitproblemnotifier.entity.Arguments;
+import com.vackosar.gitproblemnotifier.entity.BranchInfo;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -12,9 +13,9 @@ public class Main {
         final Arguments arguments = new Arguments(args);
         final Injector injector = Guice.createInjector(new Module(arguments));
         injector
-                .getInstance(ObsoleteBranchesLister.class)
-                .listObsolete().stream()
-                .map(BranchInfo::convertToOutputLine)
+                .getInstance(ObsoleteBranches.class)
+                .stream()
+                .map(BranchInfo::toOutputLine)
                 .forEach(System.out::println);
         closeGit(injector);
     }

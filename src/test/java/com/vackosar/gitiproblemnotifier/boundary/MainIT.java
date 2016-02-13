@@ -1,5 +1,7 @@
-package com.vackosar.gitiproblemnotifier;
+package com.vackosar.gitiproblemnotifier.boundary;
 
+import com.vackosar.gitiproblemnotifier.mock.LocalRepoMock;
+import com.vackosar.gitiproblemnotifier.mock.RemoteSshRepo;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Test;
 

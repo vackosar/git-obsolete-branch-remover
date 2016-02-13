@@ -1,5 +1,7 @@
-package com.vackosar.gitiproblemnotifier;
+package com.vackosar.gitiproblemnotifier.boundary;
 
+import com.vackosar.gitiproblemnotifier.mock.LocalRepoMock;
+import com.vackosar.gitiproblemnotifier.mock.RemoteRepoMock;
 import com.vackosar.gitproblemnotifier.boundary.Main;
 import org.junit.Assert;
 import org.junit.Test;
