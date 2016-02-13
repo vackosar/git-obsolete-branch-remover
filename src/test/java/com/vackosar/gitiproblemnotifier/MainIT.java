@@ -10,8 +10,4 @@ public class MainIT {
         try (LocalRepoMock localRepoMock = new LocalRepoMock(RemoteSshRepo.URL);){}
     }
 
-    @Test
-    public void parseKey() {
-
-    }
 }
