@@ -1,21 +1,20 @@
 package com.vackosar.gitproblemnotifier.entity;
 
-import com.vackosar.gitproblemnotifier.boundary.Module;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public class Arguments {
 
-    public final Path key;
+    public final Optional<Path> key;
     public final Integer days;
 
     public Arguments(String[] args) {
         if (isSingleParam(args)) {
-            key = Module.NO_KEY;
+            key = Optional.empty();
             days = Integer.valueOf(args[0]);
         } else if (isThreeParam(args)) {
-            key = Paths.get(args[1]);
+            key = Optional.of(Paths.get(args[1]));
             days = Integer.valueOf(args[2]);
         } else {
             days = null;

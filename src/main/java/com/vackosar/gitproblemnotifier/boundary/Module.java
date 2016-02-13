@@ -10,24 +10,20 @@ import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Module extends AbstractModule {
 
-    public static final Path NO_KEY = null;
+    private final String[] args;
 
-    private final Arguments args;
-
-    public Module(Arguments args) {
+    public Module(String[] args) {
         this.args = args;
     }
 
-    @Provides
-    @Singleton
-    public Git provideGit(Path workDir) throws GitAPIException {
+    @Provides @Singleton
+    public Git provideGit(Path workDir, Arguments arguments) throws GitAPIException {
         try {
             final FileRepositoryBuilder builder = new FileRepositoryBuilder();
             final FileRepositoryBuilder gitDir = builder.findGitDir(workDir.toFile());
@@ -35,8 +31,8 @@ public class Module extends AbstractModule {
                 throw new IllegalArgumentException("Git repository root directory not found ascending from current working directory:'" + workDir + "'.");
             }
             Git git = Git.wrap(builder.build());
-            if (args.key != NO_KEY) {
-                fetch(git);
+            if (arguments.key.isPresent()) {
+                fetch(git, arguments);
             }
             return git;
         } catch (IOException e) {
@@ -44,36 +40,25 @@ public class Module extends AbstractModule {
         }
     }
 
-    private void fetch(Git git) throws GitAPIException {
+    private void fetch(Git git, Arguments arguments) throws GitAPIException {
         git
                 .fetch()
-                .setTransportConfigCallback(createTransportConfigCallback(args.key))
+                .setTransportConfigCallback(createTransportConfigCallback(arguments))
                 .call();
     }
 
-    @Provides
-    @Singleton
+    @Provides @Singleton
     public Path provideWorkDir() {
         return Paths.get(System.getProperty("user.dir"));
     }
 
-    @Provides @Singleton public Arguments provideArguments() {return args;}
+    @Provides @Singleton
+    public Arguments provideArguments() {return new Arguments(args);}
 
-    private TransportConfigCallback createTransportConfigCallback(Path key) {
-        return new SshTrasportCallback(key);
+    private TransportConfigCallback createTransportConfigCallback(Arguments arguments) {
+        return new SshTrasportCallback(arguments.key.get());
     }
 
     @Override
     protected void configure() {}
-
-    void delete(File f) {
-        if (f.isDirectory()) {
-            for (File c : f.listFiles()) {
-                delete(c);
-            }
-        }
-        if (!f.delete()) {
-            throw new RuntimeException("Failed to delete file: " + f);
-        }
-    }
 }
