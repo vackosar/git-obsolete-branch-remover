@@ -41,6 +41,10 @@ public class RepoResolver implements RepositoryResolver<DaemonClient>, AutoClose
         return repositories.get(name);
     }
 
+    public Repository getRepo(String name) {
+        return repositories.get(name);
+    }
+
     private Repository createRepo() {
         Repository repo;
         try {

@@ -1,12 +1,16 @@
 package com.vackosar.gitproblemnotifier.entity;
 
 import com.vackosar.gitproblemnotifier.control.Obsoleteness;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
 public class Arguments {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public final Obsoleteness obsoleteness;
     public final Action action;
@@ -24,12 +28,18 @@ public class Arguments {
             System.err.println("  gpn [number of days to obsolete day] [--list|--remove] [--local|--remote] [key path]");
             throw new IllegalArgumentException("Invalid arguments.");
         }
+        log.info("Performing " + action + " of " + branchType + " branches " + obsoleteness + ".");
     }
 
     private Optional<Path> parseKey(String[] args) {
         if (args.length >= 4) {
             return Optional.of(Paths.get(args[3]));
         } else {
+            if (branchType == BranchType.remote && action == Action.remove) {
+                throw new IllegalArgumentException("Please provide key to remove remote branches.");
+            } else if (branchType == BranchType.remote && action == Action.list) {
+                log.warn("Listing remote branches without running fetch first because of missing key.");
+            }
             return Optional.empty();
         }
     }
@@ -38,6 +48,9 @@ public class Arguments {
         if (args.length >= 3) {
             return BranchType.valueOf(args[2].substring(2));
         } else {
+            if (action == Action.remove) {
+                return BranchType.local;
+            }
             return BranchType.remote;
         }
     }

@@ -18,4 +18,9 @@ public class Obsoleteness implements Predicate<BranchInfo> {
     public boolean test(BranchInfo entry) {
         return Duration.between(entry.lastCommit.atStartOfDay(), LocalDateTime.now()).compareTo(difference) > 0;
     }
+
+    @Override
+    public String toString() {
+        return "older than " + LocalDateTime.now().minus(difference).toLocalDate();
+    }
 }

@@ -1,6 +1,5 @@
 package com.vackosar.gitiproblemnotifier.mock;
 
-import com.vackosar.gitproblemnotifier.control.SshTrasportCallback;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -12,7 +11,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 
-public class LocalRepoMock implements AutoCloseable {
+public class LocalRepoMock implements AutoCloseable, RepoMock {
 
     public static final File PATH = new File("tmp/local");
     private static final String MESSAGE = "test";
@@ -46,7 +45,6 @@ public class LocalRepoMock implements AutoCloseable {
                 .cloneRepository()
                 .setDirectory(PATH)
                 .setURI(remote)
-                .setTransportConfigCallback(new SshTrasportCallback(KEY))
                 .call();
     }
 

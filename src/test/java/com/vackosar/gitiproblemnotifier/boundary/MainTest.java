@@ -2,8 +2,10 @@ package com.vackosar.gitiproblemnotifier.boundary;
 
 import com.vackosar.gitiproblemnotifier.mock.LocalRepoMock;
 import com.vackosar.gitiproblemnotifier.mock.RemoteRepoMock;
+import com.vackosar.gitiproblemnotifier.mock.RepoMock;
 import com.vackosar.gitproblemnotifier.boundary.Main;
 import org.eclipse.jgit.api.ListBranchCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,18 +53,21 @@ public class MainTest {
             System.setProperty(USER_DIR, workDir.toString());
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             System.setOut(new PrintStream(out));
-            Main.main(new String[]{"30", "--remove"});
-            final List<String> refNames = localRepoMock
-                    .get()
-                    .branchList()
-                    .setListMode(ListBranchCommand.ListMode.ALL)
-                    .call()
-                    .stream()
-                    .map(Ref::getName)
-                    .collect(Collectors.<String>toList());;
-            final List<String> expected = Arrays.asList("refs/heads/master", "refs/remotes/origin/master");
-            Assert.assertEquals(expected, refNames);
+            Main.main(new String[]{"30", "--remove", "--remote", "."});
+            Assert.assertEquals(Arrays.asList("refs/heads/master", "refs/remotes/origin/master"), listRefs(localRepoMock));
+            Assert.assertEquals(Arrays.asList("refs/heads/master"), listRefs(remoteRepoMock));
         }
+    }
+
+    private List<String> listRefs(RepoMock mock) throws GitAPIException {
+        return mock
+                .get()
+                .branchList()
+                .setListMode(ListBranchCommand.ListMode.ALL)
+                .call()
+                .stream()
+                .map(Ref::getName)
+                .collect(Collectors.<String>toList());
     }
 
     @Test

@@ -4,9 +4,11 @@ import com.google.inject.Singleton;
 import com.vackosar.gitproblemnotifier.entity.Action;
 import com.vackosar.gitproblemnotifier.entity.Arguments;
 import com.vackosar.gitproblemnotifier.entity.BranchInfo;
+import com.vackosar.gitproblemnotifier.entity.BranchType;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NotMergedException;
+import org.eclipse.jgit.transport.RefSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,12 @@ public class Processor implements Consumer<BranchInfo> {
         if (arguments.action == Action.remove) {
             try {
                 git.branchDelete().setBranchNames(branchInfo.getFullBranchName()).call();
+                if (arguments.branchType == BranchType.remote) {
+                    RefSpec refSpec = new RefSpec()
+                            .setSource(null)
+                            .setDestination("refs/heads/" + branchInfo.branchName);
+                    git.push().setRefSpecs(refSpec).setRemote(branchInfo.remoteName.get()).call();
+                }
             } catch (NotMergedException e) {
                 log.error("Branch '" + branchInfo.getFullBranchName() + "' was not removed because it contains unmerged changes.");
             } catch (GitAPIException e) {

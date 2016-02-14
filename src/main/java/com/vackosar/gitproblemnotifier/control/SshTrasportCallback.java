@@ -1,8 +1,11 @@
 package com.vackosar.gitproblemnotifier.control;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.vackosar.gitproblemnotifier.entity.Arguments;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig;
@@ -11,13 +14,16 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.util.FS;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
+@Singleton
 public class SshTrasportCallback implements TransportConfigCallback {
 
-    private final Path key;
+    private final Optional<Path> key;
 
-    public SshTrasportCallback(Path key) {
-        this.key = key;
+    @Inject
+    public SshTrasportCallback(Arguments arguments) {
+        this.key = arguments.key;
     }
 
     private JschConfigSessionFactory getFactory(Path key) {
@@ -39,8 +45,8 @@ public class SshTrasportCallback implements TransportConfigCallback {
 
     @Override
     public void configure(Transport transport) {
-        if (transport instanceof SshTransport) {
-            ((SshTransport) transport).setSshSessionFactory(getFactory(key));
+        if (key.isPresent() && transport instanceof SshTransport) {
+            ((SshTransport) transport).setSshSessionFactory(getFactory(key.get()));
         }
     }
 }

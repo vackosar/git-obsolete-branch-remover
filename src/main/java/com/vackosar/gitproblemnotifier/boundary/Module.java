@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import com.vackosar.gitproblemnotifier.control.SshTrasportCallback;
 import com.vackosar.gitproblemnotifier.entity.Arguments;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -23,7 +22,7 @@ public class Module extends AbstractModule {
     }
 
     @Provides @Singleton
-    public Git provideGit(Path workDir, Arguments arguments) throws GitAPIException {
+    public Git provideGit(Path workDir, Arguments arguments, SshTrasportCallback callback) throws GitAPIException {
         try {
             final FileRepositoryBuilder builder = new FileRepositoryBuilder();
             final FileRepositoryBuilder gitDir = builder.findGitDir(workDir.toFile());
@@ -32,7 +31,7 @@ public class Module extends AbstractModule {
             }
             Git git = Git.wrap(builder.build());
             if (arguments.key.isPresent()) {
-                fetch(git, arguments);
+                fetch(git, callback);
             }
             return git;
         } catch (IOException e) {
@@ -40,11 +39,11 @@ public class Module extends AbstractModule {
         }
     }
 
-    private void fetch(Git git, Arguments arguments) throws GitAPIException {
+    private void fetch(Git git, SshTrasportCallback callback) throws GitAPIException {
         git
-                .fetch()
-                .setTransportConfigCallback(createTransportConfigCallback(arguments))
-                .call();
+            .fetch()
+            .setTransportConfigCallback(callback)
+            .call();
     }
 
     @Provides @Singleton
@@ -54,14 +53,6 @@ public class Module extends AbstractModule {
 
     @Provides @Singleton
     public Arguments provideArguments() {return new Arguments(args);}
-
-    private TransportConfigCallback createTransportConfigCallback(Arguments arguments) {
-        if (arguments.key.isPresent()) {
-            return new SshTrasportCallback(arguments.key.get());
-        } else {
-            return null;
-        }
-    }
 
     @Override
     protected void configure() {}

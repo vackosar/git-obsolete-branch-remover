@@ -12,8 +12,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 
-public class RemoteRepoMock implements AutoCloseable {
+public class RemoteRepoMock implements AutoCloseable, RepoMock {
 
+    private static final String REPO_NAME = "repo.git";
     private static int port = 9418;
     public String repoUrl = null;
     private static final File DATA_ZIP = new File("src/test/resources/template.zip");
@@ -30,7 +31,7 @@ public class RemoteRepoMock implements AutoCloseable {
         } else {
             prepareTestingData();
         }
-        repoUrl = "git://localhost:" + port + "/repo.git";
+        repoUrl = "git://localhost:" + port + "/" + REPO_NAME;
         start();
         port++;
     }
@@ -84,5 +85,9 @@ public class RemoteRepoMock implements AutoCloseable {
         remoteConfig.addPushRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
         remoteConfig.update(config);
         config.save();
+    }
+
+    public Git get() {
+        return new Git(resolver.getRepo(REPO_NAME));
     }
 }
