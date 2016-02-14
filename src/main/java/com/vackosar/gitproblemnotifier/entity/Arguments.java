@@ -27,7 +27,7 @@ public class Arguments {
         } else if (args.length == 3) {
             obsoleteness = new Obsoleteness(Integer.valueOf(args[0]));
             action = Action.valueOf(args[1].substring(2));
-            branchType = BranchType.valueOf(args[2].substring(1));
+            branchType = BranchType.valueOf(args[2].substring(2));
             key = Optional.empty();
         } else if (args.length == 4) {
             obsoleteness = new Obsoleteness(Integer.valueOf(args[0]));

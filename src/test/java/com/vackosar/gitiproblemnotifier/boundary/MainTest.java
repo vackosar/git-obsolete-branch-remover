@@ -63,4 +63,25 @@ public class MainTest {
             Assert.assertEquals(expected, refNames);
         }
     }
+
+    @Test
+    public void listLocal() throws Exception {
+        try (
+                RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
+                LocalRepoMock localRepoMock = new LocalRepoMock(RemoteRepoMock.REPO_URL);
+        ){
+            localRepoMock.get().checkout().setCreateBranch(true).setName("branch1").call();
+            Path workDir = ORIG_WORK_DIR.resolve("tmp/local");
+            System.setProperty(USER_DIR, workDir.toString());
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(out));
+            Main.main(new String[]{"30", "--list", "--local"});
+            final String[] actual = out.toString().split(System.lineSeparator());
+            final String[] expected = {
+                    "branch1\t2015-11-01\tvackosar@github.com",
+            };
+            Assert.assertArrayEquals(expected, actual);
+        }
+    }
+
 }
