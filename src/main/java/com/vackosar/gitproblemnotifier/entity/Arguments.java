@@ -1,37 +1,43 @@
 package com.vackosar.gitproblemnotifier.entity;
 
+import com.vackosar.gitproblemnotifier.control.Obsoleteness;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
 public class Arguments {
 
+    public final Obsoleteness obsoleteness;
+    public final Action action;
+    public final BranchType branchType;
     public final Optional<Path> key;
-    public final Integer days;
 
     public Arguments(String[] args) {
-        if (isSingleParam(args)) {
+        if (args.length == 1) {
+            obsoleteness = new Obsoleteness(Integer.valueOf(args[0]));
+            action = Action.list;
+            branchType = BranchType.remote;
             key = Optional.empty();
-            days = Integer.valueOf(args[0]);
-        } else if (isThreeParam(args)) {
-            key = Optional.of(Paths.get(args[1]));
-            days = Integer.valueOf(args[2]);
+        } else if (args.length == 2) {
+            obsoleteness = new Obsoleteness(Integer.valueOf(args[0]));
+            action = Action.valueOf(args[1].substring(2));
+            branchType = BranchType.remote;
+            key = Optional.empty();
+        } else if (args.length == 3) {
+            obsoleteness = new Obsoleteness(Integer.valueOf(args[0]));
+            action = Action.valueOf(args[1].substring(2));
+            branchType = BranchType.valueOf(args[2].substring(1));
+            key = Optional.empty();
+        } else if (args.length == 4) {
+            obsoleteness = new Obsoleteness(Integer.valueOf(args[0]));
+            action = Action.valueOf(args[1].substring(2));
+            branchType = BranchType.valueOf(args[2].substring(2));
+            key = Optional.of(Paths.get(args[3]));
         } else {
-            days = null;
-            key = null;
-            System.err.println("Usage examples: ");
-            System.err.println("  gpn [number of days to obsolete day]");
-            System.err.println("  gpn -i [key file path] [number of days to obsolete day]");
-            Runtime.getRuntime().exit(1);
+            System.err.println("Usage example: ");
+            System.err.println("  gpn [number of days to obsolete day] [--list|--remove] [--local|--remote] [key path]");
+            throw new IllegalArgumentException("Invalid arguments.");
         }
     }
-
-    private static boolean isThreeParam(String[] args) {
-        return args.length == 3 && "-i".equals(args[0]) && Paths.get(args[1]).toFile().exists();
-    }
-
-    private static boolean isSingleParam(String[] args) {
-        return args.length == 1;
-    }
-
 }

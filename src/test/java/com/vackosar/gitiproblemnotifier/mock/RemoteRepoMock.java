@@ -15,7 +15,7 @@ import java.net.URISyntaxException;
 public class RemoteRepoMock implements AutoCloseable {
 
     public static final String REPO_URL = "git://localhost/repo.git";
-    private static final File DATA_ZIP = new File("src/test/resources/.git.zip");
+    private static final File DATA_ZIP = new File("src/test/resources/template.zip");
     private static final File REPO_DIR = new File("tmp/remote");
     private boolean bare;
     private Daemon server;

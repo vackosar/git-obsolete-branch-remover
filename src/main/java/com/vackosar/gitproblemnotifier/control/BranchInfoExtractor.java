@@ -10,14 +10,14 @@ import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ObsoleteBranchInfoExtractor implements Function<Map.Entry<String, RevCommit>, BranchInfo> {
+public class BranchInfoExtractor implements Function<Map.Entry<String, RevCommit>, BranchInfo> {
 
     @Override
     public BranchInfo apply(Map.Entry<String, RevCommit> entry) {
         final LocalDate commitTime = extractCommitTime(entry);
-        final String branchName = entry.getKey();
+        final String refName = entry.getKey();
         final String email = extractEmail(entry);
-        return new BranchInfo(commitTime, branchName, email);
+        return new BranchInfo(commitTime, refName, email);
     }
 
     private String extractEmail(Map.Entry<String, RevCommit> entry) {

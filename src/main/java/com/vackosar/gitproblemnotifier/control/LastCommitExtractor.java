@@ -24,8 +24,8 @@ public class LastCommitExtractor implements Function<Ref, Map.Entry<String, RevC
     public Map.Entry<String, RevCommit> apply(Ref ref) {
         try {
             final RevCommit commit = walk.parseCommit(ref.getObjectId());
-            final String branchname = ref.getName();
-            return new AbstractMap.SimpleImmutableEntry<>(branchname, commit);
+            final String refName = ref.getName();
+            return new AbstractMap.SimpleImmutableEntry<>(refName, commit);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

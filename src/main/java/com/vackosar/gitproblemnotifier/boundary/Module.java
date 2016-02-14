@@ -56,7 +56,11 @@ public class Module extends AbstractModule {
     public Arguments provideArguments() {return new Arguments(args);}
 
     private TransportConfigCallback createTransportConfigCallback(Arguments arguments) {
-        return new SshTrasportCallback(arguments.key.get());
+        if (arguments.key.isPresent()) {
+            return new SshTrasportCallback(arguments.key.get());
+        } else {
+            return null;
+        }
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.vackosar.gitiproblemnotifier.boundary;
 import com.vackosar.gitiproblemnotifier.mock.LocalRepoMock;
 import com.vackosar.gitiproblemnotifier.mock.RemoteRepoMock;
 import com.vackosar.gitproblemnotifier.boundary.Main;
+import org.eclipse.jgit.api.ListBranchCommand;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,6 +11,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainTest {
 
@@ -31,9 +35,32 @@ public class MainTest {
             final String[] expected = {
                     "branch1\t2015-11-01\tvackosar@github.com",
                     "branch2\t2015-11-01\tvackosar@github.com",
-                    "master\t2015-11-01\tvackosar@github.com"
             };
             Assert.assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void remove() throws Exception {
+        try (
+                RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
+                LocalRepoMock localRepoMock = new LocalRepoMock(RemoteRepoMock.REPO_URL);
+        ){
+            Path workDir = ORIG_WORK_DIR.resolve("tmp/local");
+            System.setProperty(USER_DIR, workDir.toString());
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(out));
+            Main.main(new String[]{"30", "--remove"});
+            final List<String> refNames = localRepoMock
+                    .get()
+                    .branchList()
+                    .setListMode(ListBranchCommand.ListMode.ALL)
+                    .call()
+                    .stream()
+                    .map(ref -> ref.getName())
+                    .collect(Collectors.<String>toList());;
+            final List<String> expected = Arrays.asList("refs/heads/master", "refs/remotes/origin/master");
+            Assert.assertEquals(expected, refNames);
         }
     }
 }

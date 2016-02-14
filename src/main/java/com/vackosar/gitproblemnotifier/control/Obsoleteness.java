@@ -1,20 +1,17 @@
 package com.vackosar.gitproblemnotifier.control;
 
-import com.vackosar.gitproblemnotifier.entity.Arguments;
 import com.vackosar.gitproblemnotifier.entity.BranchInfo;
 
-import javax.inject.Inject;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
-public class ObsoletePredicate implements Predicate<BranchInfo> {
+public class Obsoleteness implements Predicate<BranchInfo> {
 
-    private Duration difference = Duration.ofDays(0);
+    private final Duration difference;
 
-    @Inject
-    public ObsoletePredicate(Arguments arguments) {
-        difference = Duration.ofDays(arguments.days);
+    public Obsoleteness(Integer days) {
+        difference = Duration.ofDays(days);
     }
 
     @Override
