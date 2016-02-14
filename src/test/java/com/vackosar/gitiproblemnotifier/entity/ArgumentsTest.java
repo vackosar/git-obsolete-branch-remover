@@ -7,6 +7,7 @@ public class ArgumentsTest {
     @Test
     public void parse() {
         new Arguments(new String[] {"30"});
-        new Arguments(new String[] {"-i", "/", "30"});
+        new Arguments(new String[] {"30", "--list"});
+        new Arguments(new String[] {"30", "--list", "--remote"});
     }
 }

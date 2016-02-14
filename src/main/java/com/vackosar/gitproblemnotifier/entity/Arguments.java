@@ -14,22 +14,7 @@ public class Arguments {
     public final Optional<Path> key;
 
     public Arguments(String[] args) {
-        if (args.length == 1) {
-            obsoleteness = parseObsoleteness(args);
-            action = Action.list;
-            branchType = BranchType.remote;
-            key = Optional.empty();
-        } else if (args.length == 2) {
-            obsoleteness = parseObsoleteness(args);
-            action = parseAction(args);
-            branchType = BranchType.remote;
-            key = Optional.empty();
-        } else if (args.length == 3) {
-            obsoleteness = parseObsoleteness(args);
-            action = parseAction(args);
-            branchType = parseBranchType(args);
-            key = Optional.empty();
-        } else if (args.length == 4) {
+        if (args.length >= 1 && args.length <= 4) {
             obsoleteness = parseObsoleteness(args);
             action = parseAction(args);
             branchType = parseBranchType(args);
@@ -42,15 +27,27 @@ public class Arguments {
     }
 
     private Optional<Path> parseKey(String[] args) {
-        return Optional.of(Paths.get(args[3]));
+        if (args.length >= 4) {
+            return Optional.of(Paths.get(args[3]));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private BranchType parseBranchType(String[] args) {
-        return BranchType.valueOf(args[2].substring(2));
+        if (args.length >= 3) {
+            return BranchType.valueOf(args[2].substring(2));
+        } else {
+            return BranchType.remote;
+        }
     }
 
     private Action parseAction(String[] args) {
-        return Action.valueOf(args[1].substring(2));
+        if (args.length >= 2) {
+            return Action.valueOf(args[1].substring(2));
+        } else {
+            return Action.list;
+        }
     }
 
     private Obsoleteness parseObsoleteness(String[] args) {
