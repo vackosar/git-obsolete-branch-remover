@@ -5,7 +5,7 @@ import org.eclipse.jgit.lib.Constants;
 import java.time.LocalDate;
 import java.util.Optional;
 
-public class BranchInfo {
+public class BranchInfo implements Comparable<BranchInfo> {
 
     public final LocalDate lastCommit;
     public final String branchName;
@@ -51,5 +51,10 @@ public class BranchInfo {
 
     public static String removePrefix(String branchName) {
         return branchName.replaceFirst("^" + Constants.R_HEADS + "|" + "^" + Constants.R_REMOTES, "");
+    }
+
+    @Override
+    public int compareTo(BranchInfo o) {
+        return this.email.compareTo(o.email);
     }
 }
