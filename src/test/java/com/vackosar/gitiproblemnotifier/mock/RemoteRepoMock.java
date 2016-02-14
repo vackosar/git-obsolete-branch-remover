@@ -14,7 +14,8 @@ import java.net.URISyntaxException;
 
 public class RemoteRepoMock implements AutoCloseable {
 
-    public static final String REPO_URL = "git://localhost/repo.git";
+    private static int port = 9418;
+    public String repoUrl = null;
     private static final File DATA_ZIP = new File("src/test/resources/template.zip");
     private static final File REPO_DIR = new File("tmp/remote");
     private boolean bare;
@@ -29,7 +30,9 @@ public class RemoteRepoMock implements AutoCloseable {
         } else {
             prepareTestingData();
         }
+        repoUrl = "git://localhost:" + port + "/repo.git";
         start();
+        port++;
     }
 
     private void delete(File f) {
@@ -46,7 +49,7 @@ public class RemoteRepoMock implements AutoCloseable {
 
     private void start() {
         try {
-            server = new Daemon(new InetSocketAddress(9418));
+            server = new Daemon(new InetSocketAddress(port));
             server.getService("git-receive-pack").setEnabled(true);
             resolver = new RepoResolver(REPO_DIR, bare);
             server.setRepositoryResolver(resolver);
@@ -67,7 +70,7 @@ public class RemoteRepoMock implements AutoCloseable {
         delete(REPO_DIR);
     }
 
-    public static void configureRemote(Git git) throws URISyntaxException, IOException {
+    public void configureRemote(Git git) throws URISyntaxException, IOException {
         StoredConfig config = git.getRepository().getConfig();
         config.setString("remote", "origin" ,"fetch", "+refs/heads/*:refs/remotes/origin/*");
         config.setString("remote", "origin" ,"push", "+refs/heads/*:refs/remotes/origin/*");
@@ -75,7 +78,7 @@ public class RemoteRepoMock implements AutoCloseable {
         config.setString("branch", "master", "merge", "refs/heads/master");
         config.setString("push", null, "default", "current");
         RemoteConfig remoteConfig = new RemoteConfig(config, "origin");
-        URIish uri = new URIish(RemoteRepoMock.REPO_URL);
+        URIish uri = new URIish(repoUrl);
         remoteConfig.addURI(uri);
         remoteConfig.addFetchRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
         remoteConfig.addPushRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));

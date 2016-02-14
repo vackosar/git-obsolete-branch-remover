@@ -4,6 +4,7 @@ import com.vackosar.gitiproblemnotifier.mock.LocalRepoMock;
 import com.vackosar.gitiproblemnotifier.mock.RemoteRepoMock;
 import com.vackosar.gitproblemnotifier.boundary.Main;
 import org.eclipse.jgit.api.ListBranchCommand;
+import org.eclipse.jgit.lib.Ref;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class MainTest {
     public void list() throws Exception {
         try (
                 RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
-                LocalRepoMock localRepoMock = new LocalRepoMock(RemoteRepoMock.REPO_URL);
+                LocalRepoMock localRepoMock = new LocalRepoMock(remoteRepoMock.repoUrl);
         ){
             Path workDir = ORIG_WORK_DIR.resolve("tmp/local");
             System.setProperty(USER_DIR, workDir.toString());
@@ -44,7 +45,7 @@ public class MainTest {
     public void remove() throws Exception {
         try (
                 RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
-                LocalRepoMock localRepoMock = new LocalRepoMock(RemoteRepoMock.REPO_URL);
+                LocalRepoMock localRepoMock = new LocalRepoMock(remoteRepoMock.repoUrl);
         ){
             Path workDir = ORIG_WORK_DIR.resolve("tmp/local");
             System.setProperty(USER_DIR, workDir.toString());
@@ -57,7 +58,7 @@ public class MainTest {
                     .setListMode(ListBranchCommand.ListMode.ALL)
                     .call()
                     .stream()
-                    .map(ref -> ref.getName())
+                    .map(Ref::getName)
                     .collect(Collectors.<String>toList());;
             final List<String> expected = Arrays.asList("refs/heads/master", "refs/remotes/origin/master");
             Assert.assertEquals(expected, refNames);
@@ -68,7 +69,7 @@ public class MainTest {
     public void listLocal() throws Exception {
         try (
                 RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
-                LocalRepoMock localRepoMock = new LocalRepoMock(RemoteRepoMock.REPO_URL);
+                LocalRepoMock localRepoMock = new LocalRepoMock(remoteRepoMock.repoUrl);
         ){
             localRepoMock.get().checkout().setCreateBranch(true).setName("branch1").call();
             Path workDir = ORIG_WORK_DIR.resolve("tmp/local");

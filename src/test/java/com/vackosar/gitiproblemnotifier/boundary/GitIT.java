@@ -71,13 +71,13 @@ public class GitIT implements AutoCloseable {
     @Test
     public void pushAndPull() throws GitAPIException, IOException, InterruptedException, URISyntaxException {
         localRepoMock.commitFile();
-        new RemoteRepoMock(true);
+        final RemoteRepoMock remoteRepoMock = new RemoteRepoMock(true);
         final Git git = localRepoMock.get();
-        RemoteRepoMock.configureRemote(git);
+        remoteRepoMock.configureRemote(git);
         git.push().call();
         localRepoMock.close();
         localRepoMock = new LocalRepoMock();
-        RemoteRepoMock.configureRemote(git);
+        remoteRepoMock.configureRemote(git);
         final Git git2 = localRepoMock.get();
         git2.pull().call();
         assertFileIsPresent();
