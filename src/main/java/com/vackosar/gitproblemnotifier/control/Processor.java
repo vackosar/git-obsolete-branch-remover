@@ -26,21 +26,25 @@ public class Processor implements Consumer<BranchInfo> {
     @Override
     public void accept(BranchInfo branchInfo) {
         if (arguments.action == Action.remove) {
-            try {
-                git.branchDelete().setBranchNames(branchInfo.getFullBranchName()).call();
-                if (arguments.branchType == BranchType.remote) {
-                    RefSpec refSpec = new RefSpec()
-                            .setSource(null)
-                            .setDestination("refs/heads/" + branchInfo.branchName);
-                    git.push().setRefSpecs(refSpec).setRemote(branchInfo.remoteName.get()).call();
-                }
-            } catch (NotMergedException e) {
-                log.error("Branch '" + branchInfo.getFullBranchName() + "' was not removed because it contains unmerged changes.");
-            } catch (GitAPIException e) {
-                throw new RuntimeException(e);
-            }
+            remove(branchInfo);
         } else {
             System.out.println(branchInfo.toOutputLine());
+        }
+    }
+
+    private void remove(BranchInfo branchInfo) {
+        try {
+            git.branchDelete().setBranchNames(branchInfo.getFullBranchName()).call();
+            if (arguments.branchType == BranchType.remote) {
+                RefSpec refSpec = new RefSpec()
+                        .setSource(null)
+                        .setDestination("refs/heads/" + branchInfo.branchName);
+                git.push().setRefSpecs(refSpec).setRemote(branchInfo.remoteName.get()).call();
+            }
+        } catch (NotMergedException e) {
+            log.error("Branch '" + branchInfo.getFullBranchName() + "' was not removed because it contains unmerged changes.");
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
         }
     }
 }

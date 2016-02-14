@@ -6,6 +6,7 @@ import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class Branches {
@@ -21,6 +22,12 @@ public class Branches {
                 .call()
                 .stream()
                 .map(lastCommitExtractor)
-                .map(branchInfoExtractor);
+                .map(branchInfoExtractor)
+                .filter(this::isEssentialBranch);
+    }
+
+    public boolean isEssentialBranch(BranchInfo branchInfo) {
+        return ! Arrays.asList("develop", "master")
+                .contains(branchInfo.branchName);
     }
 }
