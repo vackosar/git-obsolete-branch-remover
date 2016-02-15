@@ -24,7 +24,7 @@ public class MainTest {
     private static final Path ORIG_WORK_DIR = Paths.get(System.getProperty(USER_DIR));
 
     @Test
-    public void list() throws Exception {
+    public void listRemote() throws Exception {
         try (
                 RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
                 LocalRepoMock localRepoMock = new LocalRepoMock(remoteRepoMock.repoUrl);
@@ -33,7 +33,7 @@ public class MainTest {
             System.setProperty(USER_DIR, workDir.toString());
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             System.setOut(new PrintStream(out));
-            Main.main(new String[]{"30"});
+            Main.main(new String[]{"30", "--list", "--remote"});
             final String[] actual = out.toString().split(System.lineSeparator());
             final String[] expected = {
                     "branch1\t2015-11-01\tvackosar@github.com",

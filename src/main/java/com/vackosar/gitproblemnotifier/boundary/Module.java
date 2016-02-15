@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.vackosar.gitproblemnotifier.control.SshTrasportCallback;
 import com.vackosar.gitproblemnotifier.entity.Arguments;
+import com.vackosar.gitproblemnotifier.entity.BranchType;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -30,7 +31,7 @@ public class Module extends AbstractModule {
                 throw new IllegalArgumentException("Git repository root directory not found ascending from current working directory:'" + workDir + "'.");
             }
             Git git = Git.wrap(builder.build());
-            if (arguments.key.isPresent()) {
+            if (arguments.branchType == BranchType.remote) {
                 fetch(git, callback);
             }
             return git;

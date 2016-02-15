@@ -36,7 +36,6 @@ public class SshTrasportCallback implements TransportConfigCallback {
             @Override
             protected JSch createDefaultJSch(FS fs) throws JSchException {
                 final JSch defaultJSch = super.createDefaultJSch(fs);
-                defaultJSch.setKnownHosts(System.getProperty("user.home") + "/.ssh/known_hosts");
                 defaultJSch.addIdentity(key.toString());
                 return defaultJSch;
             }

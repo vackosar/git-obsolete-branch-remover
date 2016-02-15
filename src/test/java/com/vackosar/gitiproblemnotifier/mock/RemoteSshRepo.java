@@ -9,9 +9,16 @@ import org.eclipse.jgit.transport.URIish;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class RemoteSshRepo {
+public class RemoteSshRepo implements AutoCloseable {
 
-    public static final String URL = "ssh://ubuntu@192.168.56.1/gpn.git";
+    public static final String URL = "ssh://ubuntu@192.168.56.1/home/ubuntu/gpn";
+
+    public RemoteSshRepo() throws Exception {
+        try (RemoteRepoMock remoteRepoMock =  new RemoteRepoMock(false)) {
+            configureRemote(remoteRepoMock.get());
+            remoteRepoMock.get().push().setPushAll().setForce(true).call();
+        }
+    }
 
     public static void configureRemote(Git git) throws URISyntaxException, IOException {
         StoredConfig config = git.getRepository().getConfig();
@@ -27,5 +34,10 @@ public class RemoteSshRepo {
         remoteConfig.addPushRefSpec(new RefSpec("refs/heads/master:refs/heads/master"));
         remoteConfig.update(config);
         config.save();
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

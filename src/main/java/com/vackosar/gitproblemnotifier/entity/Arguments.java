@@ -18,15 +18,18 @@ public class Arguments {
     public final Optional<Path> key;
 
     public Arguments(String[] args) {
-        if (args.length >= 1 && args.length <= 4) {
+        try {
+            if (!(args.length >= 1) || !(args.length <= 4)) {
+                throw new IllegalArgumentException("Wrong number of arguments.");
+            }
             obsoleteness = parseObsoleteness(args);
             action = parseAction(args);
             branchType = parseBranchType(args);
             key = parseKey(args);
-        } else {
+        } catch (Exception e) {
             System.err.println("Usage: ");
             System.err.println("  gpn [number of days to obsolete day] [--list|--remove] [--local|--remote] [key path]");
-            throw new IllegalArgumentException("Invalid arguments.");
+            throw new IllegalArgumentException("Invalid arguments.", e);
         }
         log.info("Performing " + action + " of " + branchType + " branches " + obsoleteness + ".");
     }
@@ -35,11 +38,6 @@ public class Arguments {
         if (args.length >= 4) {
             return Optional.of(Paths.get(args[3]));
         } else {
-            if (branchType == BranchType.remote && action == Action.remove) {
-                throw new IllegalArgumentException("Please provide key to remove remote branches.");
-            } else if (branchType == BranchType.remote && action == Action.list) {
-                log.warn("Listing remote branches without running fetch first because of missing key.");
-            }
             return Optional.empty();
         }
     }
@@ -48,10 +46,7 @@ public class Arguments {
         if (args.length >= 3) {
             return BranchType.valueOf(args[2].substring(2));
         } else {
-            if (action == Action.remove) {
-                return BranchType.local;
-            }
-            return BranchType.remote;
+            return BranchType.local;
         }
     }
 
