@@ -1,14 +1,14 @@
-# git-problem-notifier
+# git-obsolete-branch-remover
 
-Project leveraging JGit aiming to notify of obsolete branches or conflicts between currently in developement branches.
+Lists or removes local or remote Git branches.
 
 ## Usage:
 
 * Usage pattern:
-``` gpn [number of days to obsolete day] [--list|--remove] [--local|--remote] [unencrypted private key] ```
+``` gobr [number of days to obsolete day] [--list|--remove] [--local|--remote] [unencrypted private key] ```
 
 * List remote branches with last commit older than 30 days without fetching.
-``` gpn 30 ```
+``` gobr 30 ```
 
 * Remove remote branches with last commit older than 30 days after fetching using passed unencrypted key.
-``` gpn 30 --remove --remote ~/.ssh/id_rsa ```
+``` gobr 30 --remove --remote ~/.ssh/id_rsa ```
