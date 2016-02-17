@@ -4,11 +4,15 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.vackosar.gitproblemnotifier.control.SshTrasportCallback;
+import com.vackosar.gitproblemnotifier.entity.Action;
 import com.vackosar.gitproblemnotifier.entity.Arguments;
 import com.vackosar.gitproblemnotifier.entity.BranchType;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -16,6 +20,7 @@ import java.nio.file.Paths;
 
 public class Module extends AbstractModule {
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final String[] args;
 
     public Module(String[] args) {
@@ -32,7 +37,7 @@ public class Module extends AbstractModule {
             }
             Git git = Git.wrap(builder.build());
             if (arguments.branchType == BranchType.remote) {
-                fetch(git, callback);
+                fetch(arguments, git, callback);
             }
             return git;
         } catch (IOException e) {
@@ -40,11 +45,19 @@ public class Module extends AbstractModule {
         }
     }
 
-    private void fetch(Git git, SshTrasportCallback callback) throws GitAPIException {
-        git
-            .fetch()
-            .setTransportConfigCallback(callback)
-            .call();
+    private void fetch(Arguments arguments, Git git, SshTrasportCallback callback) throws GitAPIException {
+        try {
+            git
+                .fetch()
+                .setTransportConfigCallback(callback)
+                .call();
+        } catch (TransportException e) {
+            if (arguments.action == Action.list) {
+                log.warn("Failed to connect to the remote. Will rely on current state.");
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Provides @Singleton
