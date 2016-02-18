@@ -34,14 +34,10 @@ public class RepoResolver implements RepositoryResolver<DaemonClient>, AutoClose
         return getOrCreateRepo(name);
     }
 
-    private Repository getOrCreateRepo(String name) {
+    public Repository getOrCreateRepo(String name) {
         if (!repositories.containsKey(name)) {
             repositories.put(name, createRepo());
         }
-        return repositories.get(name);
-    }
-
-    public Repository getRepo(String name) {
         return repositories.get(name);
     }
 
@@ -65,7 +61,7 @@ public class RepoResolver implements RepositoryResolver<DaemonClient>, AutoClose
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         for (Map.Entry<String, Repository> repository: repositories.entrySet()) {
             repository.getValue().close();
         }

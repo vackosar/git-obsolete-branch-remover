@@ -7,10 +7,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.vackosar.gitobsoletebranchremover.entity.Arguments;
 import org.eclipse.jgit.api.TransportConfigCallback;
-import org.eclipse.jgit.transport.JschConfigSessionFactory;
-import org.eclipse.jgit.transport.OpenSshConfig;
-import org.eclipse.jgit.transport.SshTransport;
-import org.eclipse.jgit.transport.Transport;
+import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 
 import java.nio.file.Path;
@@ -20,6 +17,9 @@ import java.util.Optional;
 public class SshTrasportCallback implements TransportConfigCallback {
 
     private final Optional<Path> key;
+    private String password = null;
+    private URIish uri;
+    private String username;
 
     @Inject
     public SshTrasportCallback(Arguments arguments) {
@@ -31,6 +31,7 @@ public class SshTrasportCallback implements TransportConfigCallback {
 
             @Override
             protected void configure(OpenSshConfig.Host hc, Session session) {
+                session.setPassword(password);
             }
 
             @Override
@@ -46,6 +47,21 @@ public class SshTrasportCallback implements TransportConfigCallback {
     public void configure(Transport transport) {
         if (key.isPresent() && transport instanceof SshTransport) {
             ((SshTransport) transport).setSshSessionFactory(getFactory(key.get()));
+        } else if (username != null) {
+            transport.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
         }
+        uri = transport.getURI();
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public URIish getUri() {
+        return uri;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

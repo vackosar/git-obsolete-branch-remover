@@ -65,7 +65,7 @@ public class RemoteRepoMock implements AutoCloseable, RepoMock {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         server.stop();
         resolver.close();
         delete(REPO_DIR);
@@ -88,6 +88,6 @@ public class RemoteRepoMock implements AutoCloseable, RepoMock {
     }
 
     public Git get() {
-        return new Git(resolver.getRepo(REPO_NAME));
+        return new Git(resolver.getOrCreateRepo(REPO_NAME));
     }
 }

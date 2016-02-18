@@ -3,6 +3,7 @@ package com.vackosar.gitobsoletebranchremover.boundary;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.vackosar.gitobsoletebranchremover.control.LogonProxy;
 import com.vackosar.gitobsoletebranchremover.control.SshTrasportCallback;
 import com.vackosar.gitobsoletebranchremover.entity.Action;
 import com.vackosar.gitobsoletebranchremover.entity.Arguments;
@@ -28,7 +29,7 @@ public class Module extends AbstractModule {
     }
 
     @Provides @Singleton
-    public Git provideGit(Path workDir, Arguments arguments, SshTrasportCallback callback) throws GitAPIException {
+    public Git provideGit(Path workDir, Arguments arguments, SshTrasportCallback callback, LogonProxy logonProxy) throws GitAPIException {
         try {
             final FileRepositoryBuilder builder = new FileRepositoryBuilder();
             final FileRepositoryBuilder gitDir = builder.findGitDir(workDir.toFile());
@@ -37,7 +38,7 @@ public class Module extends AbstractModule {
             }
             Git git = Git.wrap(builder.build());
             if (arguments.branchType == BranchType.remote) {
-                fetch(arguments, git, callback);
+                fetch(arguments, git, callback, logonProxy);
             }
             return git;
         } catch (IOException e) {
@@ -45,16 +46,19 @@ public class Module extends AbstractModule {
         }
     }
 
-    private void fetch(Arguments arguments, Git git, SshTrasportCallback callback) throws GitAPIException {
+    private void fetch(Arguments arguments, Git git, SshTrasportCallback callback, LogonProxy logonProxy) throws GitAPIException {
         try {
-            git
-                .fetch()
-                .setTransportConfigCallback(callback)
-                .call();
+            logonProxy.call(() -> {
+                    git
+                            .fetch()
+                            .setTransportConfigCallback(callback)
+                            .call();
+            });
         } catch (TransportException e) {
             if (arguments.action == Action.list) {
                 log.warn("Failed to connect to the remote. Will rely on current state.");
             } else {
+                log.warn("Failed to connect to the remote. Will stop.");
                 throw e;
             }
         }
