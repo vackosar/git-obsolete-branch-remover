@@ -14,6 +14,7 @@ import static org.junit.Assert.assertArrayEquals;
 public class LocalRepoMock implements AutoCloseable, RepoMock {
 
     public static final File PATH = new File("tmp/local");
+    public static final String TEST_WORK_DIR = System.getProperty("user.dir") + "/";
     private static final String MESSAGE = "test";
     private static final String FILENAME = "test.txt";
     public static final File FILE = new File(PATH.getPath() + "/" + FILENAME);

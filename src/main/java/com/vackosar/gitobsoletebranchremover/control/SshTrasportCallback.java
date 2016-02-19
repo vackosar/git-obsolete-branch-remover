@@ -26,7 +26,7 @@ public class SshTrasportCallback implements TransportConfigCallback {
         this.key = arguments.key;
     }
 
-    private JschConfigSessionFactory getFactory(Path key) {
+    private JschConfigSessionFactory getFactory(Optional<Path> key) {
         return new JschConfigSessionFactory() {
 
             @Override
@@ -37,7 +37,9 @@ public class SshTrasportCallback implements TransportConfigCallback {
             @Override
             protected JSch createDefaultJSch(FS fs) throws JSchException {
                 final JSch defaultJSch = super.createDefaultJSch(fs);
-                defaultJSch.addIdentity(key.toString());
+                if (key.isPresent()) {
+                    defaultJSch.addIdentity(key.toString());
+                }
                 return defaultJSch;
             }
         };
@@ -45,8 +47,8 @@ public class SshTrasportCallback implements TransportConfigCallback {
 
     @Override
     public void configure(Transport transport) {
-        if (key.isPresent() && transport instanceof SshTransport) {
-            ((SshTransport) transport).setSshSessionFactory(getFactory(key.get()));
+        if (transport instanceof SshTransport) {
+            ((SshTransport) transport).setSshSessionFactory(getFactory(key));
         } else if (username != null) {
             transport.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
         }

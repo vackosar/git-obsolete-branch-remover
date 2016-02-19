@@ -28,24 +28,12 @@ public class LogonProxy {
         } catch (TransportException e) {
             System.out.println("Authentification failed.");
             if ("https".equals(trasportCallback.getUri().getScheme())) {
-                System.out.println("Provide username.");
-                final String username = readLine();
+                final String username = String.valueOf(System.console().readLine("Username: "));
                 trasportCallback.setUsername(username);
             }
-            System.out.println("Provide password.");
-            final String password = readLine();
+            final String password = String.valueOf(System.console().readPassword("Password: "));
             trasportCallback.setPassword(password);
+            callback.act();
         }
-    }
-
-    public static String readLine() {
-        try {
-            InputStreamReader streamReader = new InputStreamReader(System.in);
-            BufferedReader bufferedReader = new BufferedReader(streamReader);
-            return bufferedReader.readLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-//        return System.console().readLine();
     }
 }

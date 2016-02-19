@@ -56,7 +56,7 @@ public class Module extends AbstractModule {
             });
         } catch (TransportException e) {
             if (arguments.action == Action.list) {
-                log.warn("Failed to connect to the remote. Will rely on current state.");
+                log.warn("Failed to connect to the remote. Will rely on current state:" + e.getMessage());
             } else {
                 log.warn("Failed to connect to the remote. Will stop.");
                 throw e;
