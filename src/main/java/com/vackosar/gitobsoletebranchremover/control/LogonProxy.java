@@ -1,14 +1,10 @@
 package com.vackosar.gitobsoletebranchremover.control;
 
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 @Singleton
 public class LogonProxy {
@@ -26,7 +22,7 @@ public class LogonProxy {
         try {
             callback.act();
         } catch (TransportException e) {
-            System.out.println("Authentification failed.");
+            System.err.println(e.getMessage());
             if ("https".equals(trasportCallback.getUri().getScheme())) {
                 final String username = String.valueOf(System.console().readLine("Username: "));
                 trasportCallback.setUsername(username);

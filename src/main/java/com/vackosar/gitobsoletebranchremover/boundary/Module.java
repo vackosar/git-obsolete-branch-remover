@@ -58,8 +58,8 @@ public class Module extends AbstractModule {
             if (arguments.action == Action.list) {
                 log.warn("Failed to connect to the remote. Will rely on current state:" + e.getMessage());
             } else {
-                log.warn("Failed to connect to the remote. Will stop.");
-                throw e;
+                log.warn("Failed to connect to the remote. Will stop." + e.getMessage());
+                Runtime.getRuntime().exit(1);
             }
         }
     }

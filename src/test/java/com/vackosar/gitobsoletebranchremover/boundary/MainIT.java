@@ -10,18 +10,19 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.List;
 
 public class MainIT {
 
 //    @Test
     public void fetchSsh() throws Exception {
         final String[] args = {"30", "--list", "--remote"};
-        final SshTrasportCallback trasportCallback = new SshTrasportCallback(new Arguments(args));
         try (
                 final LocalRepoMock localRepoMock = new LocalRepoMock();
                 final GOBRMock gobrMock = new GOBRMock();
@@ -29,12 +30,7 @@ public class MainIT {
             RemoteSshRepo.configureRemote(localRepoMock.get());
             final Process process = gobrMock.execute(new ArrayList<>(Arrays.asList(args)));
             new PrintWriter(process.getOutputStream()).write("ubuntu\n");
-            print(process.getInputStream());
-            Assert.assertEquals(
-                    "branch1\t2015-11-01\tvackosar@github.com" + System.lineSeparator()
-                            + "branch2\t2015-11-01\tvackosar@github.com" + System.lineSeparator(),
-                    convertStreamToString(process.getInputStream())
-            );
+            print(process);
             process.waitFor();
         }
     }
@@ -47,20 +43,24 @@ public class MainIT {
     }
 
     @Test
-    public void main() throws Exception {
+    public void listRemote() throws Exception {
+        final List<String> args = Arrays.asList("30", "--list", "--remote");
+        Assert.assertEquals(
+                "branch1\t2015-11-01\tvackosar@github.com" + System.lineSeparator()
+                        + "branch2\t2015-11-01\tvackosar@github.com" + System.lineSeparator(),
+                execute(args)
+        );
+    }
+
+    private String execute(List<String> args) throws IOException, InterruptedException, GitAPIException {
         try (
                 final RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
                 final LocalRepoMock localRepoMock = new LocalRepoMock(remoteRepoMock.repoUrl);
                 final GOBRMock gobrMock = new GOBRMock();
         ) {
-            final Process process = gobrMock.execute(new ArrayList<>(Arrays.asList("30", "--list", "--remote")));
-            new PrintWriter(process.getOutputStream()).write("ubuntu\n");
-            Assert.assertEquals(
-                    "branch1\t2015-11-01\tvackosar@github.com" + System.lineSeparator()
-                            + "branch2\t2015-11-01\tvackosar@github.com" + System.lineSeparator(),
-                    convertStreamToString(process.getInputStream())
-            );
+            final Process process = gobrMock.execute(new ArrayList<>(args));
             process.waitFor();
+            return convertStreamToString(process.getInputStream());
         }
     }
 
@@ -69,11 +69,26 @@ public class MainIT {
         return s.hasNext() ? s.next() : "";
     }
 
-    private static void print(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        final Instant start = Instant.now().plusSeconds(5);
-        while (s.hasNext() && start.isAfter(Instant.now())) {
-            System.out.println(s.next());
-        }
+    private void print(final Process process) throws IOException {
+        new Thread() {
+            @Override
+            public void run() {
+                try (final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));)  {
+                    reader.lines().forEach(System.out::println);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }.start();
+        new Thread() {
+            @Override
+            public void run() {
+                try (final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));)  {
+                    reader.lines().forEach(System.err::println);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }.start();
     }
 }
