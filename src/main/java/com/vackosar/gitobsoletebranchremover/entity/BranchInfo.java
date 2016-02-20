@@ -12,13 +12,15 @@ public class BranchInfo implements Comparable<BranchInfo> {
     public final Optional<String> remoteName;
     public final String email;
     public final BranchType branchType;
+    public final boolean merged;
 
-    public BranchInfo(LocalDate lastCommit, String refName, String email) {
+    public BranchInfo(LocalDate lastCommit, String refName, String email, boolean merged) {
         this.lastCommit = lastCommit;
         this.branchType = BranchType.parse(refName);
         this.branchName = parseBranchName(refName, branchType);
         this.remoteName = parseRemoteName(refName, branchType);
         this.email = email;
+        this.merged = merged;
     }
 
     public String getFullBranchName() {
@@ -30,7 +32,7 @@ public class BranchInfo implements Comparable<BranchInfo> {
     }
 
     public String toOutputLine() {
-        return branchName + "\t" + lastCommit + "\t" + email;
+        return branchName + "\t" + lastCommit + "\t" + email + "\t" + (merged ? "merged": "unmerged");
     }
 
     public Optional<String> parseRemoteName(String refName, BranchType type) {

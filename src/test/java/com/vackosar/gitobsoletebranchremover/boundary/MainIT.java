@@ -46,8 +46,8 @@ public class MainIT {
     public void listRemote() throws Exception {
         final List<String> args = Arrays.asList("30", "--list", "--remote");
         Assert.assertEquals(
-                "branch1\t2015-11-01\tvackosar@github.com" + System.lineSeparator()
-                        + "branch2\t2015-11-01\tvackosar@github.com" + System.lineSeparator(),
+                "branch1\t2015-11-01\tvackosar@github.com\tunmerged" + System.lineSeparator()
+                        + "branch2\t2015-11-01\tvackosar@github.com\tmerged" + System.lineSeparator(),
                 execute(args)
         );
     }

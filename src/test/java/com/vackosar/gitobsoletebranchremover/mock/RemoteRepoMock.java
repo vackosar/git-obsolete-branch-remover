@@ -22,6 +22,7 @@ public class RemoteRepoMock implements AutoCloseable, RepoMock {
     private boolean bare;
     private Daemon server;
     private RepoResolver resolver;
+    private Git git;
 
     public RemoteRepoMock(boolean bare) {
         this.bare = bare;
@@ -61,14 +62,26 @@ public class RemoteRepoMock implements AutoCloseable, RepoMock {
     }
 
     private void prepareTestingData() {
+        if (REPO_DIR.exists()) {
+            delete(REPO_DIR);
+        }
         new UnZiper().act(DATA_ZIP, REPO_DIR);
     }
 
     @Override
     public void close() {
-        server.stop();
-        resolver.close();
-        delete(REPO_DIR);
+        try {
+            server.stop();
+            resolver.close();
+            if (git != null) {
+                git.getRepository().close();
+                git.close();
+            }
+            Thread.sleep(1000);
+            delete(REPO_DIR);
+        } catch (Exception e) {
+           e.printStackTrace();
+        }
     }
 
     public void configureRemote(Git git) throws URISyntaxException, IOException {
@@ -88,6 +101,9 @@ public class RemoteRepoMock implements AutoCloseable, RepoMock {
     }
 
     public Git get() {
-        return new Git(resolver.getOrCreateRepo(REPO_NAME));
+        if (git == null) {
+            git = new Git(resolver.getOrCreateRepo(REPO_NAME));
+        }
+        return git;
     }
 }

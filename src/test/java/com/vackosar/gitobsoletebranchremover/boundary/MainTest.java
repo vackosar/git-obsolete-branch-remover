@@ -3,7 +3,6 @@ package com.vackosar.gitobsoletebranchremover.boundary;
 import com.vackosar.gitobsoletebranchremover.mock.LocalRepoMock;
 import com.vackosar.gitobsoletebranchremover.mock.RemoteRepoMock;
 import com.vackosar.gitobsoletebranchremover.mock.RepoMock;
-import com.vackosar.gitobsoletebranchremover.boundary.Main;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
@@ -15,7 +14,8 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MainTest {
@@ -36,8 +36,8 @@ public class MainTest {
             Main.main(new String[]{"30", "--list", "--remote"});
             final String[] actual = out.toString().split(System.lineSeparator());
             final String[] expected = {
-                    "branch1\t2015-11-01\tvackosar@github.com",
-                    "branch2\t2015-11-01\tvackosar@github.com",
+                    "branch1\t2015-11-01\tvackosar@github.com\tunmerged",
+                    "branch2\t2015-11-01\tvackosar@github.com\tmerged",
             };
             Assert.assertArrayEquals(expected, actual);
         }
@@ -54,12 +54,12 @@ public class MainTest {
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             System.setOut(new PrintStream(out));
             Main.main(new String[]{"30", "--remove", "--remote", "."});
-            Assert.assertEquals(Arrays.asList("refs/heads/master", "refs/remotes/origin/master"), listRefs(localRepoMock));
-            Assert.assertEquals(Arrays.asList("refs/heads/master"), listRefs(remoteRepoMock));
+            Assert.assertEquals(new HashSet<>(Arrays.asList("refs/heads/master", "refs/remotes/origin/master")), collectRefs(localRepoMock));
+            Assert.assertEquals(new HashSet<>(Arrays.asList("refs/heads/master")), collectRefs(remoteRepoMock));
         }
     }
 
-    private List<String> listRefs(RepoMock mock) throws GitAPIException {
+    private Set<String> collectRefs(RepoMock mock) throws GitAPIException {
         return mock
                 .get()
                 .branchList()
@@ -67,7 +67,7 @@ public class MainTest {
                 .call()
                 .stream()
                 .map(Ref::getName)
-                .collect(Collectors.<String>toList());
+                .collect(Collectors.<String>toSet());
     }
 
     @Test
@@ -84,9 +84,32 @@ public class MainTest {
             Main.main(new String[]{"30", "--list", "--local"});
             final String[] actual = out.toString().split(System.lineSeparator());
             final String[] expected = {
-                    "branch1\t2015-11-01\tvackosar@github.com",
+                    "branch1\t2015-11-01\tvackosar@github.com\tunmerged",
             };
             Assert.assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void forceRemoveRemote() throws Exception {
+        try (
+                RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
+                LocalRepoMock localRepoMock = new LocalRepoMock(remoteRepoMock.repoUrl);
+        ){
+            localRepoMock.get().checkout().setCreateBranch(true).setName("branch1").call();
+            Path workDir = ORIG_WORK_DIR.resolve("tmp/local");
+            workDir.resolve("newFile").toFile().createNewFile();
+            localRepoMock.get().add().addFilepattern(".").call();
+            localRepoMock.get().commit().setMessage("Add new file for unit test.").call();
+            localRepoMock.get().push().call();
+            System.setProperty(USER_DIR, workDir.toString());
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(out));
+            Assert.assertEquals(new HashSet<>(Arrays.asList("refs/heads/branch1", "refs/heads/branch2", "refs/heads/master")), collectRefs(remoteRepoMock));
+            Main.main(new String[]{"0", "--remove", "--remote"});
+            Assert.assertEquals(new HashSet<>(Arrays.asList("refs/heads/master", "refs/heads/branch1")), collectRefs(remoteRepoMock));
+            Main.main(new String[]{"0", "--forceremove", "--remote"});
+            Assert.assertEquals(new HashSet<>(Arrays.asList("refs/heads/master")), collectRefs(remoteRepoMock));
         }
     }
 
