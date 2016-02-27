@@ -38,7 +38,7 @@ public class Processor implements Consumer<BranchInfo> {
             if (branchInfo.merged || force) {
                 git
                         .branchDelete()
-                        .setForce(force)
+                        .setForce(true)
                         .setBranchNames(branchInfo.getFullBranchName())
                         .call();
                 if (arguments.branchType == BranchType.remote) {
@@ -47,7 +47,7 @@ public class Processor implements Consumer<BranchInfo> {
                             .setDestination("refs/heads/" + branchInfo.branchName);
                     git
                             .push()
-                            .setForce(force)
+                            .setForce(true)
                             .setRefSpecs(refSpec)
                             .setRemote(branchInfo.remoteName.get())
                             .call();

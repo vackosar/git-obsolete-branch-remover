@@ -5,6 +5,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -22,29 +25,36 @@ public class BranchInfoExtractor implements Function<Map.Entry<String, RevCommit
     private final Git git;
     private final RevCommit developHead;
 
+    Logger log = LoggerFactory.getLogger(getClass());
+
     @Inject
     public BranchInfoExtractor(Git git) throws IOException {
         this.git = git;
         try (RevWalk walk = new RevWalk(git.getRepository());) {
-            developHead = walk.parseCommit(getBase(git));
+            developHead = walk.parseCommit(getBase());
         }
     }
 
-    private ObjectId getBase(Git git) throws IOException {
-        final Optional<ObjectId> base = Arrays.asList(
+    private ObjectId getBase() throws IOException {
+        final Optional<Map.Entry<String, ObjectId>> base = Arrays.asList(
                 "refs/remotes/origin/develop",
                 "refs/remotes/origin/master",
                 "refs/heads/develop",
                 "refs/heads/develop")
                 .stream()
-                .map(this::getRef)
-                .filter(ref -> ref != null)
+                .map(this::resolveRef)
+                .filter(ref -> ref.getValue() != null)
                 .findFirst();
         if (base.isPresent()) {
-            return base.get();
+            log.info("Merged defined as merged into " + base.get().getKey());
+            return base.get().getValue();
         } else {
             throw new IllegalArgumentException("Failed to find remote or local develop or master branches.");
         }
+    }
+
+    private Map.Entry<String, ObjectId> resolveRef(String name) {
+        return new AbstractMap.SimpleImmutableEntry<>(name, getRef(name));
     }
 
     private ObjectId getRef(String name) {
@@ -67,7 +77,7 @@ public class BranchInfoExtractor implements Function<Map.Entry<String, RevCommit
     private boolean merged(RevCommit commit) {
         try (RevWalk walk = new RevWalk(git.getRepository());) {
             if (! developHead.equals(commit)) {
-                return walk.isMergedInto(commit, developHead);
+                return walk.isMergedInto(walk.parseCommit(commit), walk.parseCommit(developHead));
             } else {
                 return true;
             }
