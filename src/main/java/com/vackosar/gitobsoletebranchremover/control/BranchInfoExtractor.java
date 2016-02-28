@@ -40,7 +40,7 @@ public class BranchInfoExtractor implements Function<Map.Entry<String, RevCommit
                 "refs/remotes/origin/develop",
                 "refs/remotes/origin/master",
                 "refs/heads/develop",
-                "refs/heads/develop")
+                "refs/heads/master")
                 .stream()
                 .map(this::resolveRef)
                 .filter(ref -> ref.getValue() != null)
