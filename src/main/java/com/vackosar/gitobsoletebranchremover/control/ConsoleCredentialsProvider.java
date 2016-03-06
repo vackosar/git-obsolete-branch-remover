@@ -1,13 +1,22 @@
 package com.vackosar.gitobsoletebranchremover.control;
 
 import com.google.inject.Singleton;
+import com.vackosar.gitobsoletebranchremover.boundary.Console;
 import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.transport.CredentialItem;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
 
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
+
 @Singleton
 public class ConsoleCredentialsProvider extends CredentialsProvider {
+    
+    @Inject private Console console;
+
+    private Map<String, String> cache = new HashMap<>();
 
     @Override
     public boolean isInteractive() {
@@ -36,15 +45,15 @@ public class ConsoleCredentialsProvider extends CredentialsProvider {
             throws UnsupportedCredentialItem {
         for (CredentialItem i : items) {
             if (i instanceof CredentialItem.Username) {
-                ((CredentialItem.Username) i).setValue(prompt(i));
+                ((CredentialItem.Username) i).setValue(get(i));
             } else if (i instanceof CredentialItem.Password) {
-                ((CredentialItem.Password) i).setValue(prompt(i).toCharArray());
+                ((CredentialItem.Password) i).setValue(get(i).toCharArray());
             } else if (i instanceof CredentialItem.StringType) {
-                ((CredentialItem.StringType) i).setValue(prompt(i));
+                ((CredentialItem.StringType) i).setValue(get(i));
             } else if (i instanceof CredentialItem.CharArrayType) {
-                ((CredentialItem.CharArrayType) i).setValue(prompt(i).toCharArray());
+                ((CredentialItem.CharArrayType) i).setValue(get(i).toCharArray());
             } else if (i instanceof CredentialItem.YesNoType) {
-                ((CredentialItem.YesNoType) i).setValue(prompt((CredentialItem.YesNoType) i));
+                ((CredentialItem.YesNoType) i).setValue(Yn.valueOf(get(i)).equals(Yn.y));
             } else if (i instanceof CredentialItem.InformationalMessage) {
                 System.out.println(i.getPromptText());
             } else {
@@ -54,16 +63,26 @@ public class ConsoleCredentialsProvider extends CredentialsProvider {
         return true;
     }
 
-    private String prompt(CredentialItem i) {
-        if (i.isValueSecure()) {
-            return String.valueOf(System.console().readPassword(i.getPromptText() + ": "));
+    private String get(CredentialItem i) {
+        if (cache.containsKey(i.getPromptText())) {
+            return cache.get(i.getPromptText());
         } else {
-            return String.valueOf(System.console().readLine(i.getPromptText() + ": "));
+            String value = prompt(i);
+            cache.put(i.getPromptText(), value);
+            return value;
         }
     }
-    
-    private boolean prompt(CredentialItem.YesNoType item) {
-        return Yn.valueOf(String.valueOf(System.console().readLine(item.getPromptText() + " [y/n]: "))).equals(Yn.y);
+
+    private String prompt(CredentialItem i) {
+        if (i.isValueSecure()) {
+            return String.valueOf(console.readPassword(i.getPromptText() + ": "));
+        } else {
+            return String.valueOf(console.readLine(i.getPromptText() + ": "));
+        }
+    }
+
+    private String prompt(CredentialItem.YesNoType item) {
+        return console.readLine(item.getPromptText() + " [y/n]: ");
     }
 
     private enum Yn {
