@@ -3,7 +3,7 @@ package com.vackosar.gitobsoletebranchremover.boundary;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.vackosar.gitobsoletebranchremover.control.TrasportCallback;
+import com.vackosar.gitobsoletebranchremover.control.TransportCallback;
 import com.vackosar.gitobsoletebranchremover.entity.Action;
 import com.vackosar.gitobsoletebranchremover.entity.Arguments;
 import com.vackosar.gitobsoletebranchremover.entity.BranchType;
@@ -28,7 +28,7 @@ public class Module extends AbstractModule {
     }
 
     @Provides @Singleton
-    public Git provideGit(Path workDir, Arguments arguments, TrasportCallback callback) throws GitAPIException {
+    public Git provideGit(Path workDir, Arguments arguments, TransportCallback callback) throws GitAPIException {
         try {
             final FileRepositoryBuilder builder = new FileRepositoryBuilder();
             final FileRepositoryBuilder gitDir = builder.findGitDir(workDir.toFile());
@@ -45,7 +45,7 @@ public class Module extends AbstractModule {
         }
     }
 
-    private void fetch(Arguments arguments, Git git, TrasportCallback callback) throws GitAPIException {
+    private void fetch(Arguments arguments, Git git, TransportCallback callback) throws GitAPIException {
         try {
                 git
                         .fetch()

@@ -1,6 +1,6 @@
 package com.vackosar.gitobsoletebranchremover.mock;
 
-import com.vackosar.gitobsoletebranchremover.control.TrasportCallback;
+import com.vackosar.gitobsoletebranchremover.control.TransportCallback;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -12,10 +12,10 @@ public class RemoteSshRepo implements AutoCloseable {
 
     public static final String URL = "ssh://ubuntu@192.168.56.1/home/ubuntu/gpn";
 
-    public RemoteSshRepo(TrasportCallback trasportCallback) throws GitAPIException {
+    public RemoteSshRepo(TransportCallback transportCallback) throws GitAPIException {
         try (RemoteRepoMock remoteRepoMock =  new RemoteRepoMock(false)) {
             configureRemote(remoteRepoMock.get());
-            remoteRepoMock.get().push().setTransportConfigCallback(trasportCallback).setPushAll().setForce(true).call();
+            remoteRepoMock.get().push().setTransportConfigCallback(transportCallback).setPushAll().setForce(true).call();
         }
     }
 

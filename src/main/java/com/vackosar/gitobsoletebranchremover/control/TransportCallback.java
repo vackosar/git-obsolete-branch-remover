@@ -14,13 +14,13 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 @Singleton
-public class TrasportCallback implements TransportConfigCallback {
+public class TransportCallback implements TransportConfigCallback {
 
     private final Optional<Path> key;
     private final CredentialsProvider credentialsProvider;
 
     @Inject
-    public TrasportCallback(Arguments arguments, ConsoleCredentialsProvider credentialsProvider) {
+    public TransportCallback(Arguments arguments, ConsoleCredentialsProvider credentialsProvider) {
         this.key = arguments.key;
         this.credentialsProvider = credentialsProvider;
     }

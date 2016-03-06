@@ -20,8 +20,8 @@ public class TransportCallbackIT {
         ConsoleCredentialsProvider providerMock = Mockito.mock(ConsoleCredentialsProvider.class);
         Mockito.when(providerMock.get(Mockito.any(URIish.class), Mockito.any(CredentialItem.class))).thenAnswer(this::answer);
         answer = "passphrase";
-        final TrasportCallback trasportCallback = new TrasportCallback(new Arguments(new String[]{"30"}), providerMock);
-        new RemoteSshRepo(trasportCallback).close();
+        final TransportCallback transportCallback = new TransportCallback(new Arguments(new String[]{"30"}), providerMock);
+        new RemoteSshRepo(transportCallback).close();
     }
 
     @Test(expected = TransportException.class)
@@ -29,8 +29,8 @@ public class TransportCallbackIT {
         ConsoleCredentialsProvider providerMock = Mockito.mock(ConsoleCredentialsProvider.class);
         Mockito.when(providerMock.get(Mockito.any(URIish.class), Mockito.any(CredentialItem.class))).thenAnswer(this::answer);
         answer = "wrong";
-        final TrasportCallback trasportCallback = new TrasportCallback(new Arguments(new String[]{"30"}), providerMock);
-        new RemoteSshRepo(trasportCallback).close();
+        final TransportCallback transportCallback = new TransportCallback(new Arguments(new String[]{"30"}), providerMock);
+        new RemoteSshRepo(transportCallback).close();
     }
 
     private Object answer(InvocationOnMock invocationOnMock) {

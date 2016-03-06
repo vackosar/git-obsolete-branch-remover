@@ -21,6 +21,7 @@ public class Processor implements Consumer<BranchInfo> {
 
     @Inject private Git git;
     @Inject private Arguments arguments;
+    @Inject private TransportCallback transportCallback;
 
     @Override
     public void accept(BranchInfo branchInfo) {
@@ -47,6 +48,7 @@ public class Processor implements Consumer<BranchInfo> {
                             .setDestination("refs/heads/" + branchInfo.branchName);
                     git
                             .push()
+                            .setTransportConfigCallback(transportCallback)
                             .setRefSpecs(refSpec)
                             .setRemote(branchInfo.remoteName.get())
                             .call();
