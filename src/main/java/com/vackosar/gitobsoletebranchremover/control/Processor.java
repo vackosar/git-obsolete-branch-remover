@@ -47,7 +47,6 @@ public class Processor implements Consumer<BranchInfo> {
                             .setDestination("refs/heads/" + branchInfo.branchName);
                     git
                             .push()
-                            .setForce(true)
                             .setRefSpecs(refSpec)
                             .setRemote(branchInfo.remoteName.get())
                             .call();
