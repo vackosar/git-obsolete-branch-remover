@@ -7,7 +7,7 @@ Lists or removes local or remote Git obsolete branches.
 
 * Usage pattern:
 
-``` gobr [number of days to obsolete day] [--list|--remove|--forceremove] [--local|--remote] [unencrypted private key] ```
+``` gobr [number of days to obsolete day] [--list|--remove|--forceremove] [--local|--remote] [private key] ```
 
 
 * List local branches with last commit older than 30.
@@ -20,6 +20,6 @@ Lists or removes local or remote Git obsolete branches.
 ``` gobr 30 --forceremove ```
 
 
-* Remove remote branches with last commit older than 30 days using passed unencrypted key.
+* Remove remote branches with last commit older than 30 days using passed private key.
 
 ``` gobr 30 --remove --remote ~/.ssh/id_rsa ```
