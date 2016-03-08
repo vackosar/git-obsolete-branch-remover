@@ -1,6 +1,6 @@
 # git-obsolete-branch-remover
 
-Lists or removes local or remote Git obsolete branches.
+Lists or removes local or remote Git branches based on last commit date and merge status.
 
 ## Usage:
 
@@ -15,7 +15,7 @@ Lists or removes local or remote Git obsolete branches.
 ``` gobr 30 ```
 
 
-* Remove branches even if they were not merged into base branch (remote/local develop/master).
+* Remove even unmerged branches (unmerged into base branch remote/local develop/master).
 
 ``` gobr 30 --forceremove ```
 
