@@ -4,10 +4,14 @@ Lists or removes local or remote Git branches based on last commit date and merg
 
 ## Usage:
 
-
-* Usage pattern:
-
-``` gobr [number of days to obsolete day] [--list|--remove|--forceremove] [--local|--remote] [private key] ```
+    usage:   gpn [number of days to obsolete day] [OPTIONS]
+     -all,--all
+     -forceremove,--forceremove
+     -k,--key <path to private key>
+     -list,--list
+     -local,--local
+     -remote,--remote
+     -remove,--remove
 
 
 * List local branches with last commit older than 30: ``` gobr 30 ```

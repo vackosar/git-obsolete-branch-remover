@@ -1,5 +1,5 @@
 package com.vackosar.gitobsoletebranchremover.entity;
 
-public enum Action{
+public enum Action {
     list, remove, forceremove;
 }

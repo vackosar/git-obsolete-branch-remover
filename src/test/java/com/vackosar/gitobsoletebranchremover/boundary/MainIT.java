@@ -27,6 +27,12 @@ public class MainIT {
         );
     }
 
+    @Test
+    public void printUsage() throws Exception {
+        final List<String> args = Arrays.asList("0", "--liXXst", "--remote");
+        Assert.assertTrue(execute(args).startsWith("usage"));
+    }
+
     private String execute(List<String> args) throws IOException, InterruptedException, GitAPIException {
         try (
                 final RemoteRepoMock remoteRepoMock = new RemoteRepoMock(false);
