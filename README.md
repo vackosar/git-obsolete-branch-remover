@@ -14,10 +14,16 @@ Lists or removes local or remote Git branches based on last commit date and merg
      -remove,--remove
 
 
-* List local branches with last commit older than 30: ``` gobr 30 ```
+* List local branches with last commit older than 30:
+
+ ``` gobr 30 ```
 
 
-* Remove even unmerged branches (unmerged into base branch remote/local develop/master): ``` gobr 30 --forceremove ```
+* Remove even unmerged branches (unmerged into base branch remote/local develop/master):
+
+ ``` gobr 30 --forceremove ```
 
 
-* Remove remote branches with last commit older than 30 days using passed private key: ``` gobr 30 --remove --remote ~/.ssh/id_rsa ```
+* Remove remote branches with last commit older than 30 days using passed private key:
+
+  ``` gobr 30 --remove --remote --key ~/.ssh/id_rsa ```
