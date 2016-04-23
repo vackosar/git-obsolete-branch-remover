@@ -28,7 +28,7 @@ Lists or removes local or remote Git branches based on last commit date and merg
 
   ``` gobr 30 --remove --remote --key ~/.ssh/id_rsa ```
 
-* Execution using Maven with automatic dependency management:
+## Execution with Maven with automatic dependency management:
 
 - [First install git-obsolete-branch-remover-1.0.0-SNAPSHOT.jar into your Maven repo.](https://maven.apache.org/guides/mini/guide-3rd-party-jars-local.html)
 - Execute following Maven POM.
