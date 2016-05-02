@@ -30,8 +30,7 @@ Lists or removes local or remote Git branches based on last commit date and merg
 
 ## Execution with Maven with automatic dependency management:
 
-- [First install git-obsolete-branch-remover-1.0.0-SNAPSHOT.jar into your Maven repo.](https://maven.apache.org/guides/mini/guide-3rd-party-jars-local.html)
-- Execute following Maven POM.
+- Execute following Maven POM goal "validate".
 
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
