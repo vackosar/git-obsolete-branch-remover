@@ -43,7 +43,7 @@ Lists or removes local or remote Git branches based on last commit date and merg
         <dependency>
             <groupId>com.vackosar.gitobsoletebranchremover</groupId>
             <artifactId>git-obsolete-branch-remover</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
     </dependencies>
     <build>
