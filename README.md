@@ -71,3 +71,7 @@ Lists or removes local or remote Git branches based on last commit date and merg
     </build>
 </project>
 ```
+
+# Subscribe
+
+[VaclavKosar.com](https://vaclavkosar.com)
